@@ -13,18 +13,19 @@ library(data.table)
 library(magrittr)
 library(stringr)
 library(yardstick)
-use_condaenv("verta_reticulate",required=T)
+# use_condaenv("verta_reticulate",required=T)
 library(vertaReticulateClient)
 ```
 
 ```{r}
+reg_random_string <- rpois(1,1000)
 
 HOST = "dev.verta.ai"
-PROJECT_NAME <-  "MTCARS Regression"
+PROJECT_NAME <-  str_glue("MTCARS Regression{reg_random_string}")
 EXPERIMENT_NAME <-  "Linear Regressions"
 WORKSPACE <-  "Stefan_Petrov"
-Sys.setenv(VERTA_EMAIL= "...",
-           VERTA_DEV_KEY = "..."
+Sys.setenv(VERTA_EMAIL= "stefan.petrov@toptal.com",
+           VERTA_DEV_KEY = "c81078a8-f9e1-47cb-abd5-d13a06fd0cdb"
            )
 
 ```
@@ -32,7 +33,10 @@ Sys.setenv(VERTA_EMAIL= "...",
 ## Initialize Client, set up some experiments
 
 ```{r}
+library(vertaReticulateClient)
 vertaReticulateClient::init_verta(HOST)
+# cl <- get_verta_client()
+# cl$create_dataset()
 proj <- vertaReticulateClient::set_verta_project(name="Reticulate MTCars")
 experiment <- vertaReticulateClient::set_verta_experiment(name="Verta R Experiment")
 ```
@@ -49,9 +53,11 @@ testSet <- mtcars[(floor(N/2)+1):N,]
 
 ```{r create_lm_model}
 run <- set_experiment_run(name="MTCars Experiment 1",desc = "MtCars Experiment")
-log_run_hyperparameters(run,hyperparams = list(hyperparam1=1,hyperparam2=2))
-log_run_hyperparameters(run,hyperparams = list(formula="mpg~."))
+log_run_hyperparameters(run,hyperparams = list(hyperparam1=1,hyperparam2=2),overwrite = T)
+log_run_hyperparameters(run,hyperparams = list(formula="mpg~."),overwrite = T)
+
 mod_mtcars <- lm(mpg~.,data = trainSet)
+
 summary_lm <- summary(mod_mtcars)
 rsq <- summary_lm$adj.r.squared
 # run_log_metric(run,key = "rsquared",value = rsq)
@@ -63,11 +69,11 @@ run2 <- set_experiment_run(name="MTCars Experiment 2",
                            desc = "MTCars Experiment 2")
 log_run_hyperparameters(run2,hyperparams = list( formula=
                                                  "mpg~cyl+disp+hp+drat+wt+qsec+vs"
-                                               ))
+                                               ),overwrite = T)
 mod_mtcars_2 <- lm(mpg~cyl+disp+hp+drat+wt+qsec+vs,data = trainSet)
 summary_lm_2 <- summary(mod_mtcars_2)
 rsq_2 <- summary_lm$adj.r.squared
-run_log_metric(run2,key = "rsquared",value = rsq_2)
+run_log_metric(run2,key = "rsquared",value = rsq_2,overwrite = T)
 
 ```
 
@@ -78,21 +84,25 @@ So we created some 2 experiment runs and added some metrics for them...
 ```{r}
 first_model_object <- list(
   model_file = mod_mtcars,
-  formula_obj = "mpg~.",original_df = trainSet,required_packages=""
+  formula_obj = "mpg~.",
+  original_df = trainSet,
+  required_packages=""
 )
 
 saveRDS(first_model_object,"mpg_experiment_object.RData")
-run$log_model(model = "mpg_experiment_object.RData")
+run$log_model(model = "mpg_experiment_object.RData",overwrite = T)# TODO- add
+# run_log
 ```
 
 The downloaded model is almost what's needed. From the web UI it works fine.
 
 ```{r download_model_buggy}
 # there is some issue with this
-run$download_model("downloaded_model")
-downloaded_model <- readRDS("downloaded_model/tmp9_h_qyst")# this 
+run$download_model("downloaded_model.RData")
+downloaded_model <- readRDS("downloaded_model.RData")# this 
 downloaded_model # this is almost what it should be, but not quite...
 downloaded_model_lm <- downloaded_model[["model_file"]]
+downloaded_model_lm
 
 ```
 
@@ -133,9 +143,10 @@ plumber_template_location <- file.path(path.package("vertaReticulateClient"),
                                          "plumber_sample.R"
 )
 
+
 createDockerfile(
-  # model_file_location = "../mpg_model.RData",
-  model_file_location = downloaded_model, 
+  model_file_location = "../mpg_model.RData",
+  # model_file_location = downloaded_model, 
   runner_template_location = runner_template_location,
   plumber_template_location = plumber_template_location,
   required_packages = "forecast"

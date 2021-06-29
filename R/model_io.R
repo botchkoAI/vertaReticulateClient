@@ -106,9 +106,11 @@ predict_new_model <- function(file,data){
 createDockerfile <- function(
     model_file_location,
     required_packages=c("forecast"),
-    plumber_template_location =
-      "/media/sidi/SSDPrograms/toptal/verta/VertaPackageTests/plumber_sample_file/plumber_sample.R",
-  runner_template_location = "/media/sidi/SSDPrograms/toptal/verta/VertaPackageTests/plumber_sample_file/to_run"
+    plumber_template_location = file.path(path.package("vertaReticulateClient"),
+                                          "plumber_sample.R"
+    ),
+  runner_template_location = file.path(path.package("vertaReticulateClient"), "to_run.R" )
+    # "/media/sidi/SSDPrograms/toptal/verta/VertaPackageTests/plumber_sample_file/to_run"
 ){
 
   MAGIC_FILE_NAME <- str_glue("./tmp_model_file_{rpois(1,10000)}.RData")

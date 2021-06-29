@@ -57,6 +57,7 @@ init_verta <- function(HOST
   },error=function(e){
     print(str_glue("Couldn't initialize conda env {condaenv}. Attempting to install..."))
   reticulate::conda_create(envname = "verta_reticulate")
+  reticulate::use_condaenv(condaenv=condaenv,required = TRUE)
 
   })
   reticulate::py_available(initialize = TRUE)
@@ -65,8 +66,14 @@ init_verta <- function(HOST
   }, error = function(e) {
     message('couldn\'t import verta client. Trying to install')
     install_verta()
+    print("Successfully Installed Verta")
+
     verta <- reticulate::import("verta")
+    print("Successfully loaded Verta")
   })
+
+  verta <- reticulate::import("verta")
+
   # options(verta=verta)
   client <- (verta$Client(
     host = HOST
@@ -992,7 +999,6 @@ run_log_metric <- function(run,key, value, overwrite = FALSE) {
 #'
 #' @export
 get_best_run_by_metric <- function(experiment,metric, descending = TRUE) {
-
   stopifnot(is(experiment,"verta.tracking.entities.Experiment"))
   python_function_result <- experiment$expt_runs$sort(
     key = metric,
