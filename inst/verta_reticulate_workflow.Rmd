@@ -1,0 +1,166 @@
+---
+title: "Verta Reticulate Workflow"
+output: html_notebook
+---
+
+This is closely following this [jupyter notebook](https://github.com/VertaAI/modeldb/blob/master/client/workflows/demos/dataset-registry-endpoint.ipynb)
+
+# Setup
+
+```{r}
+library(reticulate)
+library(data.table)
+library(magrittr)
+library(stringr)
+library(yardstick)
+use_condaenv("verta_reticulate",required=T)
+library(vertaReticulateClient)
+```
+
+```{r}
+
+HOST = "dev.verta.ai"
+PROJECT_NAME <-  "MTCARS Regression"
+EXPERIMENT_NAME <-  "Linear Regressions"
+WORKSPACE <-  "Stefan_Petrov"
+Sys.setenv(VERTA_EMAIL= "...",
+           VERTA_DEV_KEY = "..."
+           )
+
+```
+
+## Initialize Client, set up some experiments
+
+```{r}
+vertaReticulateClient::init_verta(HOST)
+proj <- vertaReticulateClient::set_verta_project(name="Reticulate MTCars")
+experiment <- vertaReticulateClient::set_verta_experiment(name="Verta R Experiment")
+```
+
+## Use mtcars for the experiment
+
+```{r train_test_split}
+N <- nrow(mtcars)
+trainSet <- mtcars[1:floor(N/2),]
+testSet <- mtcars[(floor(N/2)+1):N,]
+```
+
+## Create 2 registered models to compate
+
+```{r create_lm_model}
+run <- set_experiment_run(name="MTCars Experiment 1",desc = "MtCars Experiment")
+log_run_hyperparameters(run,hyperparams = list(hyperparam1=1,hyperparam2=2))
+log_run_hyperparameters(run,hyperparams = list(formula="mpg~."))
+mod_mtcars <- lm(mpg~.,data = trainSet)
+summary_lm <- summary(mod_mtcars)
+rsq <- summary_lm$adj.r.squared
+# run_log_metric(run,key = "rsquared",value = rsq)
+
+```
+
+```{r create_lm_model_2}
+run2 <- set_experiment_run(name="MTCars Experiment 2",
+                           desc = "MTCars Experiment 2")
+log_run_hyperparameters(run2,hyperparams = list( formula=
+                                                 "mpg~cyl+disp+hp+drat+wt+qsec+vs"
+                                               ))
+mod_mtcars_2 <- lm(mpg~cyl+disp+hp+drat+wt+qsec+vs,data = trainSet)
+summary_lm_2 <- summary(mod_mtcars_2)
+rsq_2 <- summary_lm$adj.r.squared
+run_log_metric(run2,key = "rsquared",value = rsq_2)
+
+```
+
+So we created some 2 experiment runs and added some metrics for them...
+
+## Log Model and Upload Artifacts
+
+```{r}
+first_model_object <- list(
+  model_file = mod_mtcars,
+  formula_obj = "mpg~.",original_df = trainSet,required_packages=""
+)
+
+saveRDS(first_model_object,"mpg_experiment_object.RData")
+run$log_model(model = "mpg_experiment_object.RData")
+```
+
+The downloaded model is almost what's needed. From the web UI it works fine.
+
+```{r download_model_buggy}
+# there is some issue with this
+run$download_model("downloaded_model")
+downloaded_model <- readRDS("downloaded_model/tmp9_h_qyst")# this 
+downloaded_model # this is almost what it should be, but not quite...
+downloaded_model_lm <- downloaded_model[["model_file"]]
+
+```
+
+### We'll use downloaded_model to build a docker service
+
+```{r}
+lm_model_from_download <- downloaded_model$model_file
+```
+
+## Find the best run and it's hyperparameters
+
+```{r}
+best_run <- get_best_run_by_metric(experiment,
+                                   "metrics.rsquared",descending = T)
+best_run_hyperparameters <- best_run$get_hyperparameters()
+```
+
+# Register the Best Model as in the jupyter
+
+```{r}
+
+registered_model_best_mtcars <- verta_get_or_create_registered_model(name="mtcars_best",
+                                                      workspace = WORKSPACE)
+registered_model_best_mtcars$create_version_from_run(best_run$id,name="v5")
+```
+
+## Model Deployment
+
+Here we simply use the downloaded_model in order to deploy a service at localhost:8000
+
+```{r model deployment}
+
+runner_template_location <- file.path(path.package("vertaReticulateClient"),
+"to_run.R"
+)
+
+plumber_template_location <- file.path(path.package("vertaReticulateClient"),
+                                         "plumber_sample.R"
+)
+
+createDockerfile(
+  # model_file_location = "../mpg_model.RData",
+  model_file_location = downloaded_model, 
+  runner_template_location = runner_template_location,
+  plumber_template_location = plumber_template_location,
+  required_packages = "forecast"
+  )
+
+# library(stringr)
+
+runDocker(location =".",
+          tag = "verta-plumber"
+)
+
+
+
+```
+
+now test w/ the following reques request:
+
+curl -X POST --location "<http://localhost:8000/score>"\
+-H "Accept: application/json"\
+-d "{"cyl":8,"disp":440,"hp":230,"drat":3.83,"wt":5.345,"qsec":17.42,"vs":0,"am":0,"gear":3,"carb":4,"\_row":"Chrysler Imperial"}"
+
+------------------------------------------------------------------------
+
+Or
+
+POST <http://localhost:8000/score> Accept: application/json
+
+{"cyl":8,"disp":440,"hp":230,"drat":3.83,"wt":5.345,"qsec":17.42,"vs":0,"am":0,"gear":3,"carb":4,"\_row":"Chrysler Imperial"}
