@@ -25,7 +25,7 @@ PROJECT_NAME <-  str_glue("MTCARS Regression{reg_random_string}")
 EXPERIMENT_NAME <-  "Linear Regressions"
 WORKSPACE <-  "Stefan_Petrov"
 Sys.setenv(VERTA_EMAIL= "stefan.petrov@toptal.com",
-           VERTA_DEV_KEY = "c81078a8-f9e1-47cb-abd5-d13a06fd0cdb"
+           VERTA_DEV_KEY = "...."
            )
 
 ```
