@@ -9,4 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports:stringr, assertthat, plumber, reticulate
+Imports: stringr, assertthat, plumber, reticulate
+RoxygenNote: 7.1.1
