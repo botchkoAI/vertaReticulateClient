@@ -24,8 +24,9 @@ HOST = "dev.verta.ai"
 PROJECT_NAME <-  str_glue("MTCARS Regression{reg_random_string}")
 EXPERIMENT_NAME <-  "Linear Regressions"
 WORKSPACE <-  "Stefan_Petrov"
-Sys.setenv(VERTA_EMAIL= "stefan.petrov@toptal.com",
-           VERTA_DEV_KEY = "c81078a8-f9e1-47cb-abd5-d13a06fd0cdb"
+Sys.setenv(VERTA_EMAIL= "...",
+           VERTA_DEV_KEY = "..."
+           
            )
 
 ```
@@ -52,7 +53,7 @@ testSet <- mtcars[(floor(N/2)+1):N,]
 ## Create 2 registered models to compate
 
 ```{r create_lm_model}
-run <- set_experiment_run(name="MTCars Experiment 1",desc = "MtCars Experiment")
+run <- set_experiment_run(name="MTCars Experiment 4",desc = "MtCars Experiment 4")
 log_run_hyperparameters(run,hyperparams = list(hyperparam1=1,hyperparam2=2),overwrite = T)
 log_run_hyperparameters(run,hyperparams = list(formula="mpg~."),overwrite = T)
 
@@ -65,8 +66,8 @@ rsq <- summary_lm$adj.r.squared
 ```
 
 ```{r create_lm_model_2}
-run2 <- set_experiment_run(name="MTCars Experiment 2",
-                           desc = "MTCars Experiment 2")
+run2 <- set_experiment_run(name="MTCars Experiment 3",
+                           desc = "MTCars Experiment 3")
 log_run_hyperparameters(run2,hyperparams = list( formula=
                                                  "mpg~cyl+disp+hp+drat+wt+qsec+vs"
                                                ),overwrite = T)
@@ -98,8 +99,12 @@ The downloaded model is almost what's needed. From the web UI it works fine.
 
 ```{r download_model_buggy}
 # there is some issue with this
-run$download_model("downloaded_model.RData")
-downloaded_model <- readRDS("downloaded_model.RData")# this 
+# run$download_model("downloaded_model.RData")
+run$log_model(model = "mpg_experiment_object.RData",overwrite = T)# TODO- add
+run$download_model("./dl_model/download_model.RData")
+# run$download_model("./dl_model/")
+
+downloaded_model <- readRDS("./dl_model/download_model.RData")# this 
 downloaded_model # this is almost what it should be, but not quite...
 downloaded_model_lm <- downloaded_model[["model_file"]]
 downloaded_model_lm
@@ -154,9 +159,9 @@ createDockerfile(
 
 # library(stringr)
 
-runDocker(location =".",
-          tag = "verta-plumber"
-)
+# runDocker(location =".",
+#           tag = "verta-plumber"
+# )
 
 
 
@@ -175,3 +180,15 @@ Or
 POST <http://localhost:8000/score> Accept: application/json
 
 {"cyl":8,"disp":440,"hp":230,"drat":3.83,"wt":5.345,"qsec":17.42,"vs":0,"am":0,"gear":3,"carb":4,"\_row":"Chrysler Imperial"}
+```{r}
+createDockerfileWithFolder(
+  model_file_location = "../mpg_model.RData",
+  # model_file_location = downloaded_model, 
+  runner_template_location = runner_template_location,
+  plumber_template_location = plumber_template_location,
+  required_packages = "forecast"
+  )
+
+inst
+```
+
