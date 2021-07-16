@@ -28,7 +28,7 @@ Sys.setenv(VERTA_EMAIL= "...",
            VERTA_DEV_KEY = "...")
 ```
 
-## Initialize Client 
+## Initialize Client
 
 ```{r}
 library(vertaReticulateClient)
@@ -181,7 +181,7 @@ POST <http://localhost:8000/score> Accept: application/json
 ```{r}
 createDockerfileWithFolder(
   model_file_location = "../mpg_model.RData",
-  # model_file_location = downloaded_model,
+  # model_file_location = downloaded_model, 
   runner_template_location = runner_template_location,
   plumber_template_location = plumber_template_location,
   required_packages = "forecast"
