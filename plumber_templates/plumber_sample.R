@@ -155,6 +155,7 @@ function(req)
 {
   dat <- req[["postBody"]]
   df <- as.data.frame(fromJSON(dat))
+  print(df)
   predict(model_object, newdata=df)
 }
 

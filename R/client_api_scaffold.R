@@ -1,28 +1,72 @@
 #' Install Verta Library
+#' @param method - auto, virtualenv, or conda
+#' @param conda The path to a conda executable. Use "auto" to allow reticulate
+#' to automatically find an appropriate conda binary. See
+#' Finding Conda in reticulate  for more details.
+#' @param envname  The name, or full path, of the environment in which Python
+#' packages are to be installed. When NULL (the default), the active environment
+#'  as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
+#'   then the r-reticulate environment will be used.
+#' @param
+#'
 #'
 #' @return
 #' @export
 #'
 #' @examples
-install_verta <- function() {
+install_verta <- function(
+  method = c("auto", "virtualenv", "conda"),
+  conda = "auto",
+  envname = "verta_reticulate",
+  extra_packages = NULL,
+  conda_python_version = "3.9.5",
+  ...
+
+
+) {
+
+
   requireNamespace("reticulate", quietly = TRUE)
   if (!isNamespaceLoaded("reticulate"))
     stop('couldn\'t load reticulate package')
-  reticulate::conda_create(envname = "verta_reticulate")
-  reticulate::use_condaenv("verta_reticulate")
-  reticulate::py_available(initialize = T)
-  reticulate::py_install(packages = 'verta')
-  tryCatch({
-    reticulate::import('psutil')
-  }, error = function(e){
-    reticulate::py_install(packages = 'psutil')
-  })
+
+  method <- match.arg(method)
+  # unroll version
+
+  package <- "verta"
+
+  extra_packages <- unique(extra_packages)
+
+  reticulate::py_install(
+    packages       = c(package,"psutil", extra_packages),
+    envname        = envname,
+    method         = method,
+    conda          = conda,
+    python_version = conda_python_version,
+    pip            = TRUE,
+    ...
+  )
+
+
+  # reticulate::conda_create(envname = "verta_reticulate")
+  # reticulate::use_condaenv("verta_reticulate")
+  # reticulate::py_available(initialize = T)
+  # reticulate::py_install(packages = 'verta')
+  # tryCatch({
+  #   reticulate::import('psutil')
+  # }, error = function(e){
+  #   reticulate::py_install(packages = 'psutil')
+  # })
+
 }
 
 
 #' Initialize Verta Client object
 #'
 #' @param HOST
+#' @param method - auto, virtualenv, or conda
+#' @param conda - path to conda executable
+#' @param envname
 #' @param python one of [python,conda, miniconda, venv]
 #' @param python_path path, optional
 #'
@@ -30,19 +74,101 @@ install_verta <- function() {
 #' @export
 #'
 #' @examples
-init_verta <- function(HOST
-                       ,
+init_verta <- function(HOST,
+                       method = "conda",
+                       conda = "auto",
+                       envname = "verta_reticulate",
+                       extra_packages = NULL,
+                       conda_python_version = "3.9.5",
                        # python = NULL,
-                       #  python_path=NULL,
-                       condaenv = "verta_reticulate"
+                        python_path=NULL
+                       # condaenv = "verta_reticulate"
 ) {
   # username <- Sys.getenv("VERTA_EMAIL")
   # token <- Sys.getenv("VERTA_DEV_KEY")
   requireNamespace("reticulate", quietly = TRUE)
   if (!isNamespaceLoaded("reticulate"))
     stop('couldn\'t load reticulate package')
-  reticulate::py_available()
+  # reticulate::py_available()
+  if(length(method)>1){
+    method <- "conda"
+  }
+  library(reticulate)
 
+if(T){
+  use_condaenv(condaenv = envname,required = T)
+  1
+}else{
+
+  tryCatch({
+    switch(
+      method,
+      python= {
+        use_python(python_path,required=T)
+        },
+      conda = {
+        use_condaenv(condaenv = envname,required = T)
+        },
+      virtualenv = {
+        use_virtualenv(envname,required = T)
+        },
+      miniconda = {
+        use_miniconda(envname,required = T)
+      }
+    )
+
+
+  },
+  error= function(e){
+    print(e)
+    install_verta( method = method, conda = conda, envname = envname,
+       extra_packages = NULL,
+       conda_python_version = conda_python_version  )
+    switch(
+      method,
+      python= {
+        use_python(python_path,required=T)
+        },
+      conda = {
+        use_condaenv(condaenv = envname,required = T)
+        },
+      virtualenv = {
+        use_virtualenv(envname,required = T)
+        },
+      miniconda = {
+        use_miniconda(envname,required = T)
+      }
+    )
+
+
+  }
+
+
+  )
+
+
+  switch(
+      method,
+      python= {
+        use_python(python_path,required=T)
+        },
+      conda = {
+        use_condaenv(condaenv = envname,required = T)
+        },
+      virtualenv = {
+        use_virtualenv(envname,required = T)
+        },
+      miniconda = {
+        use_miniconda(envname,required = T)
+      }
+    )
+
+  # py_install <- switch(method,
+  #                  python =install_python,
+  #                  conda = py_insta,
+  #                  miniconda =use_miniconda,
+  #                  virtualenv=use_virtualenv
+  # )
   # if(!is.null(python)){
   #   switch (python,
   #           python = reticulate::use_python(python = python_path, required = TRUE),
@@ -52,25 +178,31 @@ init_verta <- function(HOST
   #           stop('Invalid python argument, should be one of [python, conda, miniconda, venv]')
   #   )
   # }
-  tryCatch({
-  reticulate::use_condaenv(condaenv=condaenv,required = TRUE)
-  },error=function(e){
-    print(str_glue("Couldn't initialize conda env {condaenv}. Attempting to install..."))
-  reticulate::conda_create(envname = "verta_reticulate")
-  reticulate::use_condaenv(condaenv=condaenv,required = TRUE)
 
-  })
-  reticulate::py_available(initialize = TRUE)
-  tryCatch({
-    verta <- reticulate::import("verta")
-  }, error = function(e) {
-    message('couldn\'t import verta client. Trying to install')
-    install_verta()
-    print("Successfully Installed Verta")
+  # tryCatch({
+  # py_use(condaenv,required = TRUE)
+  # },error=function(e){
+  #   print(str_glue("Couldn't initialize conda env {condaenv}. Attempting to install..."))
+  # reticulate::conda_create(envname = "verta_reticulate")
+  # reticulate::use_condaenv(condaenv=condaenv,required = TRUE)
+  #
+  # py_use(condaenv=condaenv,required = TRUE)
+  #
+  # })
+}
 
-    verta <- reticulate::import("verta")
-    print("Successfully loaded Verta")
-  })
+  # stopifnot(reticulate::py_available(initialize = TRUE))
+  # tryCatch({
+  #   verta <- reticulate::import("verta")
+  # }, error = function(e) {
+  #   message('couldn\'t import verta client. Trying to install')
+  #   install_verta()
+  #   print("Successfully Installed Verta")
+  #
+  #   verta <- reticulate::import("verta")
+  #   print("Successfully loaded Verta")
+  # })
+  #
 
   verta <- reticulate::import("verta")
 

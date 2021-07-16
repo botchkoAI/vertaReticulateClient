@@ -20,7 +20,8 @@ save_model_data <- function(file_to_save_at,
                             modFile,
                             formula_obj,
                             original_df,
-                            required_packages=NULL
+                            required_packages=NULL,
+                            additional_objects=list()
 ) {
 
   lenN <- min(ceiling(
@@ -33,7 +34,8 @@ save_model_data <- function(file_to_save_at,
     model_file = modFile,
     formula_obj = formula_obj,
     original_df=original_df[1:lenN],
-    required_packages = required_packages
+    required_packages = required_packages,
+    additional_objects = additional_objects
   )
   saveRDS(object = dat,file=file_to_save_at)
 }
@@ -49,7 +51,8 @@ save_model_data <- function(file_to_save_at,
 #' @examples
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
-  for (nm in c("model_file","formula_obj","original_df","required_packages")) {
+  for (nm in c("model_file","formula_obj","original_df","required_packages",
+               "required_packages")) {
     assertthat::assert_that(nm%in% names(dat))
   }
 
@@ -108,10 +111,10 @@ createDockerfile <- function(
     model_file_location,
     required_packages=c("forecast"),
     plumber_template_location = file.path(path.package("vertaReticulateClient"),
-                                          "plumber_sample.R"
+                                          "plumber_sample.R",
+    additional_objects_file_location = "additional_objects.RData"
     ),
   runner_template_location = file.path(path.package("vertaReticulateClient"), "to_run.R" )
-    # "/media/sidi/SSDPrograms/toptal/verta/VertaPackageTests/plumber_sample_file/to_run"
 ){
 
   MAGIC_FILE_NAME <- str_glue("./tmp_model_file_{rpois(1,10000)}.RData")
@@ -124,6 +127,11 @@ createDockerfile <- function(
     }
   }else{
     MAGIC_FILE_NAME <- model_file_location
+  }
+  if(!file.exists(additional_objects_file_location)){
+    print(str_glue("Additional object location not found!"))
+  }else{
+    print(str_glue("Additional object location found!"))
   }
 
   mydocker <- dockerfiler::Dockerfile$new("rstudio/plumber")
@@ -147,6 +155,14 @@ createDockerfile <- function(
     mydocker$COPY(MAGIC_FILE_NAME, "/usr/scripts/model_file.RData")
     mydocker$COPY(plumber_template_location, "/usr/scripts/plumber.R")
     mydocker$COPY(runner_template_location, "/usr/scripts/run.R")
+
+    if(!file.exists(additional_objects_file_location)){
+      print(str_glue("Additional object location not found!"))
+    }else{
+      print(str_glue("Additional object location found!"))
+      mydocker$COPY(additional_objects_file_location, "/usr/scripts/additional_objects.RData")
+      print(str_glue("copied additional file to Docker!"))
+    }
     # mydocker$COPY(runner_template_location, "/usr/scripts/plumber.R")
     # mydocker$RUN
     mydocker$EXPOSE(8000)
@@ -204,7 +220,9 @@ createDockerContextZip <- function(
     plumber_template_location = file.path(path.package("vertaReticulateClient"),
                                           "plumber_sample.R"
     ),
-  runner_template_location = file.path(path.package("vertaReticulateClient"), "to_run.R" )
+  runner_template_location = file.path(
+    path.package("vertaReticulateClient"), "to_run.R" ),
+  additional_objects_file_location = NULL
     # "/media/sidi/SSDPrograms/toptal/verta/VertaPackageTests/plumber_sample_file/to_run"
 ){
 
@@ -236,6 +254,10 @@ createDockerContextZip <- function(
             file.path(MAGIC_FOLDER_NAME,"runner_template.R"))
   file.copy(plumber_template_location,
             file.path(MAGIC_FOLDER_NAME,"plumber_template.R"))
+  if(!is.null(additional_objects_file_location)){
+    file.copy(additional_objects_file_location,
+              file.path(MAGIC_FOLDER_NAME,"additional_objects.RData"))
+  }
 
 
 
@@ -260,6 +282,10 @@ createDockerContextZip <- function(
     mydocker$COPY(MAGIC_FILE_NAME, "/usr/scripts/model_file.RData")
     mydocker$COPY("plumber_template.R", "/usr/scripts/plumber.R")
     mydocker$COPY("runner_template.R", "/usr/scripts/run.R")
+    if(!is.null(additional_objects_file_location)){
+      mydocker$COPY("additional_objects.RData", "/usr/scripts/additional_objects.RData")
+    }
+
     # mydocker$COPY(runner_template_location, "/usr/scripts/plumber.R")
     # mydocker$RUN
     mydocker$EXPOSE(8000)

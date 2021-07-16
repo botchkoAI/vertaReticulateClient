@@ -14,7 +14,7 @@ library(magrittr)
 library(stringr)
 library(yardstick)
 # use_condaenv("verta_reticulate",required=T)
-library(vertaReticulateClient)
+# library(vertaReticulateClient)
 ```
 
 ```{r}
@@ -28,7 +28,7 @@ Sys.setenv(VERTA_EMAIL= "...",
            VERTA_DEV_KEY = "...")
 ```
 
-## Initialize Client, set up some experiments
+## Initialize Client 
 
 ```{r}
 library(vertaReticulateClient)
@@ -84,7 +84,8 @@ first_model_object <- list(
   model_file = mod_mtcars,
   formula_obj = "mpg~.",
   original_df = trainSet,
-  required_packages=""
+  required_packages="",
+  additionalObjects=list()
 )
 
 saveRDS(first_model_object,"mpg_experiment_object.RData")

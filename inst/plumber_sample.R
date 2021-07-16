@@ -55,22 +55,6 @@ save_model_data <- function(file_to_save_at,
 }
 
 
-#' Title
-#'
-#' @param file
-#'
-#' @return
-#' @export
-#'
-#' @examples
-load_model_from_metadata <- function(file){
-  dat  <- readRDS(file = file)
-  for (nm in c("model_file","formula_obj","original_df","required_packages")) {
-    assertthat::assert_that(nm%in% names(dat))
-  }
-
-  return(dat)
-}
 
 #' Predict Data From Saved Model
 #'
@@ -140,6 +124,18 @@ for(lib in required_libraries){
     }
 }
 
+# if("additional_objects"%in%names(deployment_object)){
+#   add_object_list <- deployment_object[["additional_objects"]]
+#   stopifnot(is.list(add_object_list))
+#   for (nm in names(add_object_list)){
+#     print(str_glue("assigning {nm} to global environment"))
+#     assign(nm,add_object_list[[nm]],envir = globalenv())
+#   }
+#   print("contents of the global environment")
+#   print(ls())
+#
+# }
+
 #* Echo back the input
 #* @param msg The message to echo
 #* @get /echo
@@ -147,14 +143,54 @@ function(msg = "") {
     list(msg = paste0("The message is: '", msg, "'"))
 }
 
+if("additional_objects.Rdata"%in%list.files()){
+  load("additional_objects.RData")
+}
 
 
 # rq <- list()
 #* @post /score
 function(req)
 {
+  if("additional_objects.RData"%in%list.files()){
+  print("loading additional objects from objects.Rdata")
+  load("additional_objects.RData")
+  print("loaded additional objects from objects.Rdata")
+  print(
+    paste("loaded additional objects from additional file",
+       paste0(ls(),collapse = ",")
+    ))
+  }
+
+  # print(names(deployment_object))
+  # if("additional_objects"%in%names(deployment_object)){
+  #   add_object_list <- deployment_object[["additional_objects"]]
+  #   stopifnot(is.list(add_object_list))
+  #   for (nm in names(add_object_list)){
+  #     print(str_glue("assigning {nm} to global environment"))
+  #     assign(nm,add_object_list[[nm]],envir = globalenv())
+  #   }
+  #   print("contents of the global environment")
+  #   print(ls())
+  #
+  # }
+
+  print("request body")
+  print(req)
   dat <- req[["postBody"]]
+
+  print("request body processed")
+  print(dat)
   df <- as.data.frame(fromJSON(dat))
+  if("predict.arima"%in%ls()){
+    print("predict.arima is in ls()")
+  }else{
+    print("ls():")
+    print(ls())
+    print(ls(envir = globalenv()))
+  }
+  print(class(model_object))
+  print("Currently available methods for predict:")
+  print(methods(predict))
   predict(model_object, newdata=df)
 }
-
