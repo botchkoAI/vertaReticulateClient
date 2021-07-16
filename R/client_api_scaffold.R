@@ -84,6 +84,8 @@ init_verta <- function(HOST,
                         python_path=NULL
                        # condaenv = "verta_reticulate"
 ) {
+
+  install_verta(method,conda,envname,extra_packages,conda_python_version)
   # username <- Sys.getenv("VERTA_EMAIL")
   # token <- Sys.getenv("VERTA_DEV_KEY")
   requireNamespace("reticulate", quietly = TRUE)
@@ -95,7 +97,7 @@ init_verta <- function(HOST,
   }
   library(reticulate)
 
-if(T){
+if(F){
   use_condaenv(condaenv = envname,required = T)
   1
 }else{
