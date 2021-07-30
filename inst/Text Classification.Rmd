@@ -1,0 +1,310 @@
+---
+title: "text_classification_predict"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Custom Predict Function - Text Classification
+
+In this document we present an example of building a text authorship classification, and deploying it to Verta. The tutorial is based on the modelling in [Julia Silge's text analysis](https://www.r-bloggers.com/2018/12/text-classification-with-tidy-data-principles/) .
+
+We turn the text into a bag-of-words model and fit a regularized logistic regression to predict to which book a text would belong to.
+
+We will then build an api that takes takes a data frame with a single column, called 'text', and single column, and returns the probability of it belonging to the 'Pride and Prejudice'.
+
+We download couple of books from the Gutenberg project,
+
+```{r download }
+library(tidyverse)
+library(gutenbergr)
+library(vertaReticulateClient)
+
+titles <- c(
+  "The War of the Worlds",
+  "Pride and Prejudice",
+  ""
+)
+books <- gutenberg_works(title %in% titles) %>%
+  gutenberg_download(meta_fields = "title") %>%
+  mutate(document = row_number())
+
+books
+
+```
+
+```{r}
+books %>% select(title) %>% unique()
+```
+
+## Process the Text and Prepare Design Matrix
+
+```{r}
+library(tidytext)
+
+tidy_books <- books %>%
+  unnest_tokens(word, text) %>%
+  group_by(word) %>%
+  filter(n() > 10) %>%
+  ungroup()
+
+tidy_books
+
+```
+
+### Stylistic Difference of Text
+
+```{r}
+tidy_books %>%
+  count(title, word, sort = TRUE) %>%
+  anti_join(get_stopwords()) %>%
+  group_by(title) %>%
+  top_n(20) %>%
+  ungroup() %>%
+  ggplot(aes(reorder_within(word, n, title), n,
+    fill = title
+  )) +
+  geom_col(alpha = 0.8, show.legend = FALSE) +
+  scale_x_reordered() +
+  coord_flip() +
+  facet_wrap(~title, scales = "free") +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(
+    x = NULL, y = "Word count",
+    title = "Most frequent words after removing stop words",
+    subtitle = "Words like 'said' occupy similar ranks but other words are quite different"
+  )
+```
+
+## Build The Model
+
+```{r}
+library(rsample)
+
+books_split <- books %>%
+  select(document) %>%
+  initial_split()
+train_data <- training(books_split)
+test_data <- testing(books_split)
+
+```
+
+```{r}
+sparse_words <- tidy_books %>%
+  count(document, word) %>%
+  inner_join(train_data) %>%
+  cast_sparse(document, word, n)
+
+class(sparse_words)
+## [1] "dgCMatrix"
+## attr(,"package")
+## [1] "Matrix"
+dim(sparse_words)
+## [1] 12028  1652
+```
+
+```{r}
+word_rownames <- as.integer(rownames(sparse_words))
+
+books_joined <- tibble(document = word_rownames) %>%
+  left_join(books %>%
+    select(document, title))
+```
+
+```{r}
+
+library(glmnet)
+library(doMC)
+registerDoMC(cores = 8)
+
+is_jane <- books_joined$title == "Pride and Prejudice"
+model <- cv.glmnet(sparse_words, is_jane,
+  family = "binomial",
+  parallel = TRUE, keep = TRUE
+)
+```
+
+## Manual Prediction Function
+
+Here we have the option of using the `predict` function of glmnet objects, but instead we'll gather the coefficients and calculate directly. This has the advantage of not having to build up the sparse design matrix every time, though makes it harder to swap prediction methods.
+
+```{r}
+
+library(broom)
+
+coefs <- model$glmnet.fit %>%
+  tidy() %>%
+  filter(lambda == model$lambda.1se)
+```
+
+
+```{r}
+intercept <- coefs %>%
+  filter(term == "(Intercept)") %>%
+  pull(estimate)
+
+classifications <- tidy_books %>%
+  inner_join(test_data) %>%
+  inner_join(coefs, by = c("word" = "term")) %>%
+  group_by(document) %>%
+  summarize(score = sum(estimate)) %>%
+  mutate(probability = plogis(intercept + score))
+
+classifications
+
+```
+
+```{r}
+txtClassifier <- list(coefs=coefs,intercept= intercept)
+class(txtClassifier) <- "TextClassifier"
+
+
+# create a prediction function
+predict.TextClassifier <- function(model,newdata,colname="value"){
+  if(!is.data.frame(newdata)){
+    stopifnot(is.character(newdata))
+    # convert to string
+    newdata <- tibble(text=newdata)
+  }
+  if(is.data.frame(newdata)){
+    stopifnot("text"%in%colnames(newdata))
+  if(!("document"%in%colnames(newdata))){
+    newdata[["document"]] <- 1
+  }
+  }
+  print(newdata)
+  
+  
+  newdata <- newdata %>%
+    unnest_tokens(word, text) %>%
+    group_by(word) %>%
+    # filter(n() > 10) %>%
+    ungroup()
+
+  print(newdata)
+  coefs <- model$coefs
+  intercept <- model$intercept
+  newdata %>% 
+  inner_join(coefs, by = c("word" = "term")) %>%
+  group_by(document) %>%
+  summarize(score = sum(estimate)) %>%
+  mutate(probability = plogis(intercept + score))
+  
+}
+```
+
+### Build Custom Prediction Class and OB
+
+```{r}
+text_classification_deployment_object <- list(
+  model_file = txtClassifier,
+  formula_obj="",
+  original_df = sparse_words,
+  required_packages = c("tidytext","gutenberg","tidyverse"),
+  additional_objects=list(
+    "predict.TextClassifier"=predict.TextClassifier
+  )
+)
+```
+
+
+Let's try the predictions with random exerpts from the corresponding books:
+
+```{r}
+sample_text_negative <- "Everything was then quite invisible, hidden by the deep pit and the heap of sand that the fall of the cylinder had made."
+# predict(txtClassifier,sample_text_negative)
+
+sample_text_book_negative <- tibble(text = sample_text_negative)
+# tidy_text_representation_negative <- sample_text_book %>%
+#   unnest_tokens(word, text) %>%
+#   group_by(word) %>%
+#   # filter(n() > 10) %>%
+#   ungroup()
+# 
+prediction_negative <- predict(txtClassifier,sample_text_book_negative)
+prediction_negative
+```
+
+And a positive example.
+```{r}
+sample_text_book_positive <- "Mr. Bennet was so odd a mixture of quick parts, sarcastic humour,
+reserve, and caprice, that the experience of three-and-twenty years had
+been insufficient to make his wife understand his character. Her mind
+was less difficult to develop. She was a woman of mean understanding, little information, and uncertain temper. When she was discontented, she fancied herself nervous. The business of her life was to get
+her daughters married; its solace was visiting and news."
+
+
+sample_text_book_positive <- tibble(text = sample_text_book_positive)
+
+# tidy_text_representation_positive <- sample_text_book_positive %>%
+#   unnest_tokens(word, text) %>%
+#   group_by(word) %>%
+#   # filter(n() > 10) %>%
+#   ungroup()
+
+prediction_positive <- predict(txtClassifier,sample_text_book_positive)
+prediction_positive
+```
+
+
+# Model Deployment
+
+## Initialize Client and Associated Objects
+```{r}
+reg_random_string <- rpois(1,1000)
+experiment_random_string <- rpois(1,1000)
+
+reg_random_string <- rpois(1,1000)
+experiment_random_string <- rpois(1,1000)
+
+PROJECT_NAME <-  str_glue("Text Authorship Examples {reg_random_string}")
+EXPERIMENT_NAME <-  str_glue("Text Authorship {experiment_random_string}")
+WORKSPACE <-  "..."
+
+# library(vertaReticulateClient)
+HOST = "dev.verta.ai"
+Sys.setenv(VERTA_EMAIL= "...",
+          VERTA_DEV_KEY = "...")
+
+init_verta(HOST)
+
+```
+
+```{r}
+proj <- set_verta_project(name=PROJECT_NAME)
+experiment <- set_verta_experiment(name=EXPERIMENT_NAME)
+```
+```{r}
+run <- set_experiment_run(name=EXPERIMENT_NAME,desc = "Authorship Attribution")
+saveRDS(text_classification_deployment_object,"textClassificationDeploymentObject.RData")
+run$log_model(model = "textClassificationDeploymentObject.RData")# # TODO- add# run_log
+
+
+```
+
+
+
+
+```{r}
+createDockerContextZip(
+  "textClassificationDeploymentObject.RData.RData",
+  required_packages = text_classification_deployment_object$required_packages
+  
+)
+```
+
+```{r}
+buildDocker(location = "docker_folder_RXFRD9058O/",tag="verta-text:latest")
+```
+
+Test with for example 
+
+
+    POST http://localhost:8000/score
+    Content-Type: application/json
+
+    [{"text":"This was not written by Jane Austin."}]
+
+
