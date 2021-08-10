@@ -15,7 +15,7 @@
 #'
 #' @examples
 install_verta <- function(
-  method = c("auto", "virtualenv", "conda"),
+  method = c("conda","auto","virtualenv"),
   conda = "auto",
   envname = "verta_reticulate",
   extra_packages = NULL,
@@ -85,16 +85,21 @@ init_verta <- function(HOST,
                        # condaenv = "verta_reticulate"
 ) {
 
-  install_verta(method,conda,envname,extra_packages,conda_python_version)
+tryCatch(
+  install_verta(method,conda,envname,extra_packages,conda_python_version),
+  error = function(e){
+  print(e)
+  }
+  )
   # username <- Sys.getenv("VERTA_EMAIL")
   # token <- Sys.getenv("VERTA_DEV_KEY")
   requireNamespace("reticulate", quietly = TRUE)
   if (!isNamespaceLoaded("reticulate"))
     stop('couldn\'t load reticulate package')
   # reticulate::py_available()
-  if(length(method)>1){
-    method <- "conda"
-  }
+#   if(length(method)>1){
+#     method <- "conda"
+#   }
   library(reticulate)
 
 if(F){
@@ -108,6 +113,10 @@ if(F){
       python= {
         use_python(python_path,required=T)
         },
+       auto= {
+        use_python(python_path,required=T)
+        }
+        ,
       conda = {
         use_condaenv(condaenv = envname,required = T)
         },
@@ -131,6 +140,9 @@ if(F){
       python= {
         use_python(python_path,required=T)
         },
+      auto= {
+        use_python(python_path,required=T)
+        },
       conda = {
         use_condaenv(condaenv = envname,required = T)
         },
@@ -152,6 +164,9 @@ if(F){
   switch(
       method,
       python= {
+        use_python(python_path,required=T)
+        },
+      auto= {
         use_python(python_path,required=T)
         },
       conda = {
@@ -861,7 +876,6 @@ verta_get_registered_model_version <- function(id) {
 #' @export
 verta_set_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL) {
   cl <- get_verta_client()
-
   python_function_result <- cl$set_experiment(
     name = name,
     desc = desc,
@@ -960,13 +974,13 @@ verta_set_workspace <- function(workspace) {
 #' Verta workspace.
 #'
 #' @export
-verta_log_model <- function(run,model) {
-  stopifnot(run, "verta.tracking.entities.ExperimentRun")
+verta_log_model <- function(run,model,overwrite = FALSE) {
+  stopifnot(is(run,"verta.tracking.entities.ExperimentRun"))
   # cl <- get_verta_client()
 
   python_function_result <- run$log_model(
-    workspace = workspace
-  )
+    model = model,overwrite=overwrite
+   )
   return(python_function_result)
 }
 
@@ -1147,4 +1161,5 @@ get_best_run_by_metric <- function(experiment,metric, descending = TRUE) {
 
 }
 
+#TODO add download model
 
