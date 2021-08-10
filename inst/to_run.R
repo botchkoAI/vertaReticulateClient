@@ -17,7 +17,7 @@ library(stringr)
 #' @examples
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
-  for (nm in c("model_file","formula_obj","original_df","required_packages",
+  for (nm in c("model_fit","formula_obj","original_df","required_packages",
                "additional_objects")) {
     assertthat::assert_that(nm%in% names(dat))
   }
@@ -41,7 +41,7 @@ deployment_object <- load_model_from_metadata(
 #* @apiTitle Plumber Example API
 
 # deployment_object <- readRDS("model_to_deploy.rds")
-model_object <- deployment_object[["model_file"]]
+model_object <- deployment_object[["model_fit"]]
 required_libraries <- deployment_object[["required_packages"]]
 
 for(lib in required_libraries){

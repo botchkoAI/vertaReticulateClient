@@ -46,7 +46,7 @@ save_model_data <- function(file_to_save_at,
     required_packages = c("")
   }
   dat <- list(
-    model_file = modFile,
+    model_fit = modFile,
     formula_obj = formula_obj,
     original_df=original_df[1:lenN],
     required_packages = required_packages
@@ -70,7 +70,7 @@ save_model_data <- function(file_to_save_at,
 #' @examples
 predict_new_model <- function(file,data){
   modeldat <- load_model_from_metadata(file)
-  modelObj <- modeldat[["model_file"]]
+  modelObj <- modeldat[["model_fit"]]
   formula_obj <- modeldat[["formula_obj"]]
   original_df <- modeldat[["original_df"]]
   required_packages <- modeldat[['required_packages']]
@@ -100,7 +100,6 @@ deployment_object <- load_model_from_metadata(
   "model_file.RData"
   )
 
-# mod_metadata$model_file
 
 
 # library(logger)
@@ -108,7 +107,7 @@ deployment_object <- load_model_from_metadata(
 #* @apiTitle Plumber Example API
 
 # deployment_object <- readRDS("model_to_deploy.rds")
-model_object <- deployment_object[["model_file"]]
+model_object <- deployment_object[["model_fit"]]
 required_libraries <- deployment_object[["required_packages"]]
 
 for(lib in required_libraries){
