@@ -15,8 +15,8 @@ library(stringr)
 #' @examples
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
-  for (nm in c("model_file","formula_obj","original_df","required_packages",
-               "required_packages")) {
+#   print(names(dat))
+  for (nm in c("model_file","required_packages","required_packages")) {
     assertthat::assert_that(nm%in% names(dat))
   }
 
@@ -197,10 +197,17 @@ createDockerContextZip <- function(
 
   # create a temporary folder to work in.
   MAGIC_FOLDER_NAME <- createRandString()
+  dir.create(MAGIC_FOLDER_NAME)
   # if we are passing a file name, then read that in memory
   if(is.character(model_file_location)){
       modelData <- readRDS(model_file_location)
       MAGIC_FILE_NAME <- model_file_location
+
+        if(is.list(modelData)){
+          if("model_fit"%in%names(modelData)){
+            saveRDS(modelData,file=file.path(MAGIC_FOLDER_NAME,MAGIC_FILE_NAME))
+          }
+        }
 	}
   else{
      # if the model is already in memory, write it to a temporary folder
@@ -210,7 +217,7 @@ createDockerContextZip <- function(
       }
       dir.create(MAGIC_FOLDER_NAME)
         if(is.list(model_file_location)){
-          if("model_file"%in%names(model_file_location)){
+          if("model_fit"%in%names(model_file_location)){
             saveRDS(model_file_location,file=file.path(MAGIC_FOLDER_NAME,MAGIC_FILE_NAME))
           }
         }

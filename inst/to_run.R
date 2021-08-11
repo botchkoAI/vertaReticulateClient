@@ -17,7 +17,8 @@ library(stringr)
 #' @examples
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
-  for (nm in c("model_fit","formula_obj","original_df","required_packages",
+  print(names(dat))
+  for (nm in c("model_fit","required_packages",
                "additional_objects")) {
     assertthat::assert_that(nm%in% names(dat))
   }
