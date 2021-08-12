@@ -156,12 +156,21 @@ runDocker <- function(location=".",tag = "verta-plumber"){
 #' @return
 #'
 #' @examples
-createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1) {
+createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1,add_docker_substring=T,add_rdata=F) {
   digits = 0:9 %>% as.character()
   v = c(sample(LETTERS, letter_len1, replace = TRUE),
         sample(digits, digit_len, replace = TRUE),
         sample(LETTERS, letter_len2, replace = TRUE))
-  paste0("docker_folder_",paste0(v,collapse = ""),collapse = "")
+
+        res = paste0(v,collapse = "")
+        if(add_docker_substring){
+        res <- paste0("docker_folder_",res)
+        }
+        if(add_rdata){
+            res <- paste0(res,".Rdata",collapse = "")
+        }
+#   paste0("docker_folder_",paste0(v,collapse = ""),collapse = "")
+  res
 
 }
 
@@ -345,4 +354,54 @@ save_model_data <- function(file_to_save_at,
     runnerTemplateFileLines = runnerTemplateFileLines
   )
   saveRDS(object = dat,file=file_to_save_at)
+}
+
+
+
+
+
+
+#' @title Create a model and deploy it to the verta system
+#' @description This function gathers R objects from the workspace, needed to deploy an API endpoint and is intended to be used with log_model.
+#' It simply gathers all needed objects, puts them in a list, and saves the list to disk. Then that file is logged with run$log_model.
+#' This object can then be turned into a docker context with createDockerContextZip
+#' @param run  a
+#' @param modFile the fit model object
+#' @param required_packages character vector of required packages to call the predict function
+#' @param runner_template_location - a location of the runner template file- by default taken from the package
+#' @param plumber_template_location - a location of the plumber template file- by default taken from the package directory
+#' @return nothing
+#' @export
+#'
+#' @examples
+log_model_data <- function(run,
+                            modFile,
+                            required_packages=NULL,
+                            additional_objects=list(),
+                            plumber_template_location = file.path(path.package("vertaReticulateClient"),
+                                                                  "plumber_sample.R"
+                            ),
+                          runner_template_location = file.path(
+                            path.package("vertaReticulateClient"), "to_run.R" )
+) {
+
+   # save everything needed to a temp file
+   tmp_file <- createRandString(add_docker_substring=F,add_rdata=T) # create temporary file name
+
+   save_model_data(
+     tmp_file,modFile = modFile,
+     required_packages = required_packages,
+     additional_objects = additional_objects,
+     plumber_template_location = plumber_template_location,
+     runner_template_location = runner_template_location
+   )
+
+   # log the model to verta
+   verta_log_model(run,tmp_file,overwrite = T)
+   # clean up by deleting the temp file
+   if (file.exists(tmp_file)) {
+      file.remove(tmp_file)
+    }
+
+
 }

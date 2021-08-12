@@ -180,7 +180,8 @@ function(req)
 
   print("request body processed")
   print(dat)
-  df <- as.data.frame(fromJSON(dat))
+  # df <- as.data.frame(fromJSON(dat))
+  df <- fromJSON(dat)
   if("predict.arima"%in%ls()){
     print("predict.arima is in ls()")
   }else{
@@ -191,5 +192,8 @@ function(req)
   print(class(model_object))
   print("Currently available methods for predict:")
   print(methods(predict))
-  predict(model_object, newdata=df)
+  #TODO- test this.
+  predict(model_object,newdata=df)
 }
+
+

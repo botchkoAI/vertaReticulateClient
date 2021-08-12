@@ -181,28 +181,18 @@ save_model_data(file_to_save_at = "fctArtifact.RData",
 
 
 
-```{r}
-
-# first_model_object <- list(
-#   model_file = WWWusageFit,
-#   formula_obj = "mpg~.",
-#   original_df = WWWusageTrain,
-#   required_packages=c("forecast"),
-#   additional_objects=list(
-#     "predict.newForecaster"=predict.newForecaster
-#   ),
-#   
-#   
-# )
-# 
-# saveRDS(first_model_object,"WWWUsage_object.RData")
-
-```
 
 ### Log the model for future usage
 
 ```{r}
-run$log_model(model = "fctArtifact.RData",overwrite = T)# # TODO- add# run_log
+log_model_data(run=run,
+                  modFile = WWWusageFit,
+                  # formula_obj = "mpg~.",
+                  # original_df = WWWusageTrain,
+                  required_packages = c("forecast"),
+                  additional_objects = list("predict.newForecaster"=predict.newForecaster)
+  
+)
 ```
 
 ```{r}
