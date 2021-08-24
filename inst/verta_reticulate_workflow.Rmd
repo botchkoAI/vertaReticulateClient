@@ -127,8 +127,8 @@ best_run_hyperparameters <- best_run$get_hyperparameters()
 
 ```{r}
 
-registered_model_best_mtcars <- verta_get_or_create_registered_model(name="mtcars_best",
-                                                      workspace = WORKSPACE)
+registered_model_best_mtcars <- get_or_create_registered_model(name="mtcars_best",
+                                                               workspace = WORKSPACE)
 registered_model_best_mtcars$create_version_from_run(best_run$id,name="v5")
 ```
 

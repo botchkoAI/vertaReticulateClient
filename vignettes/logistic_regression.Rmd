@@ -1,0 +1,147 @@
+---
+title: "Logistic Regression Example"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Logistic Regression Example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Poisson Regression Example 
+
+ In this vignette we'll build a simple model from r`glm`'s help function and
+ deploy it to Verta.
+
+# Building the model
+```{r poisson regression}
+## Dobson (1990) Page 93: Randomized Controlled Trial :
+counts <- c(18,17,15,20,10,20,25,13,12)
+outcome <- gl(3,1,9)
+treatment <- gl(3,3)
+original_df <- data.frame(treatment, outcome, counts) # showing data
+original_df
+```
+
+
+```{r fit poisson regression}
+glm.D93 <- glm(counts ~ outcome + treatment, family = poisson())
+
+```
+
+Test predictions with a simple datapoint.
+```{r test }
+predict(glm.D93,newdata = data.frame(outcome ="1",treatment  = "2" ))
+```
+
+## Prepare the Prediciton object for Deployment
+
+ In this case we simply pass the object. The other parameters are not actually needed.
+ The structure of the object is as follows:
+ * model_file - the object we call the r`predict` function on.
+ * formula_obj - optional, 
+ 
+```{r}
+poisson_model_object <- list(
+  model_file = glm.D93
+)
+
+saveRDS(poisson_model_object,"poisson_model_object.RData")
+```
+
+## Set up Verta Connection
+
+
+```{r}
+library(stringr)
+reg_random_string <- rpois(1,1000)
+experiment_random_string <- rpois(1,1000)
+
+reg_random_string <- rpois(1,1000)
+experiment_random_string <- rpois(1,1000)
+
+PROJECT_NAME <-  str_glue("Poisson GLM Example {reg_random_string}")
+EXPERIMENT_NAME <-  str_glue("Poisson GLM Example {experiment_random_string}")
+WORKSPACE <-  "Stefan_Petrov"
+
+# library(vertaReticulateClient)
+HOST = "dev.verta.ai"
+
+assertthat::see_if(
+  (length(Sys.getenv("VERTA_EMAIL"))>1)&(
+    length(Sys.getenv("VERTA_DEV_KEY"))>1
+  )
+)
+library(vertaReticulateClient)
+init_verta(HOST)
+proj <- set_verta_project(name=PROJECT_NAME)
+experiment <- set_experiment(name=EXPERIMENT_NAME)
+```
+
+
+
+```{r}
+run <- set_experiment_run(name=EXPERIMENT_NAME,desc = "Poisson Model Run")
+# run$log_model(model = "poisson_model_object.RData",overwrite = T)# # TODO- add# run_log
+log_model(run, "poisson_model_object.RData", overwrite = T)
+
+```
+## Download the model
+```{r}
+run$download_model("./poisson_model_object_downloaded.RData")
+
+downloaded_model <- readRDS("poisson_model_object_downloaded.RData")# this
+downloaded_model 
+```
+## Build the Docker image
+```{r}
+# createDockerContextZip(
+#   "poisson_model_object_downloaded.RData",
+#   required_packages = c() 
+#   )
+```
+
+```{r}
+# buildDocker(location = "docker_folder_WZRUV5146S/",tag="verta-poisson:latest")
+```
+
+
+run it
+```{bash,eval=F}
+docker kill $(docker container ls -q)
+docker run -p 8000:8000 verta-poisson:latest
+```
+
+Example http call and response:
+### Post to verta-poisson
+
+POST http://localhost:8000/score
+Content-Type: application/json
+
+[{"treatment":"1","outcome": "1"}]
+
+
+### Response
+
+
+HTTP/1.1 200 OK
+Date: Fri, 30 Jul 2021 17:03:38 GMT
+Content-Type: application/json
+Content-Length: 8
+
+[
+  3.0445
+]
+
+Response code: 200 (OK); Time: 143ms; Content length: 8 bytes
+
+
+

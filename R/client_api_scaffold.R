@@ -7,13 +7,14 @@
 #' packages are to be installed. When NULL (the default), the active environment
 #'  as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
 #'   then the r-reticulate environment will be used.
-#' @param
+#' @param extra_packages Extra packages to install.
+#' @param conda_python_version passed to reticulate::py_install
+#' @param ... passed down to reticulate::py_install
 #'
 #'
-#' @return
+#' @return Nothing
 #' @export
 #'
-#' @examples
 install_verta <- function(
   method = c("conda","auto","virtualenv"),
   conda = "auto",
@@ -63,17 +64,16 @@ install_verta <- function(
 
 #' Initialize Verta Client object
 #'
-#' @param HOST
+#' @param HOST The
 #' @param method - auto, virtualenv, or conda
 #' @param conda - path to conda executable
-#' @param envname
+#' @param envname name of the conda environment
 #' @param python one of [python,conda, miniconda, venv]
 #' @param python_path path, optional
 #'
 #' @return
 #' @export
 #'
-#' @examples
 init_verta <- function(HOST,
                        method = "conda",
                        conda = "auto",
@@ -262,8 +262,7 @@ get_verta_client <- function() {
 #' @param public_within_org If creating a Project in an organization's workspace: True for
 # public, False for private. In older backends, default is
 # private; in newer backends, uses the org's settings by default.
-#' @param visibility <string>:28: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Visibility to set when creating this project. If not provided, an
+#' @param visibility  Visibility to set when creating this project. If not provided, an
 # appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #' @param id ID of the Project. This parameter cannot be provided alongside name, and other
@@ -272,7 +271,7 @@ get_verta_client <- function() {
 #' @return :class:`~verta._tracking.project.Project`
 #'
 #' @export
-set_verta_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
+set_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$set_project(
@@ -308,7 +307,7 @@ set_verta_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NUL
 #' @return :class:`~verta._tracking.experiment.Experiment`
 #'
 #' @export
-set_verta_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL) {
+set_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$set_experiment(
@@ -334,23 +333,16 @@ set_verta_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = 
 #' @param public_within_org If creating an endpoint in an organization's workspace: True
 # for public, False for private. In older backends, default is
 # private; in newer backends, uses the org's settings by default.
-#' @param visibility <string>:21: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-#
-# <string>:21: (ERROR/3) Unknown interpreted text role "ref".
-#
-# Visibility to set when creating this endpoint. If not provided, an
+#' @param visibility Visibility to set when creating this endpoint. If not provided, an
 # appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #'
 #' @return :class:`~verta.registry._entities.model.RegisteredModel`
-# <string>:25: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
 #
-# <string>:25: (ERROR/3) Unknown interpreted text role "class".
+#
 #'
 #' @export
-verta_create_endpoint <- function(path, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
+create_endpoint <- function(path, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$create_endpoint(
@@ -375,12 +367,9 @@ verta_create_endpoint <- function(path, description = NULL, workspace = NULL, pu
 #' @param attrs Attributes of the Experiment.
 #'
 #' @return :class:`~verta._tracking.experiment.Experiment`
-# <string>:18: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:18: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_create_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL) {
+create_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$create_experiment(
@@ -408,20 +397,14 @@ verta_create_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs
 #' @param public_within_org If creating a Project in an organization's workspace: True for
 # public, False for private. In older backends, default is
 # private; in newer backends, uses the org's settings by default.
-#' @param visibility <string>:27: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-# <string>:27: (ERROR/3) Unknown interpreted text role "ref".
-# Visibility to set when creating this project. If not provided, an
+#' @param visibility Visibility to set when creating this project. If not provided, an
 # appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #'
 #' @return :class:`~verta._tracking.project.Project`
-# <string>:31: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:31: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_create_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
+create_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$create_project(
@@ -450,12 +433,9 @@ verta_create_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = 
 #' @param visibility visibility
 #'
 #' @return :class:`~verta.registry._entities.model.RegisteredModel`
-# <string>:28: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:28: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
+create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$create_registered_model(
@@ -478,18 +458,9 @@ verta_create_registered_model <- function(name = NULL, desc = NULL, labels = NUL
 #' @param download_to_path Local path to download manifest YAML to.
 #' @param path Path of the endpoint.
 #' @param name Name of the endpoint.
-#' @param strategy <string>:11: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-# <string>:11: (ERROR/3) Unknown interpreted text role "ref".
-# Strategy (direct or canary) for updating the endpoint.
-# #' @param resources <string>:13: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:13: (ERROR/3) Unknown interpreted text role "class".
-# Resources allowed for the updated endpoint.
-#' @param autoscaling <string>:15: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:15: (ERROR/3) Unknown interpreted text role "class".
-# Autoscaling condition for the updated endpoint.
+#' @param strategy Strategy (direct or canary) for updating the endpoint.
+#' @param resources Resources allowed for the updated endpoint.
+#' @param autoscaling Autoscaling condition for the updated endpoint.
 #' @param env_vars Environment variables.
 #' @param workspace Workspace for the endpoint. If not provided, the current user's
 # personal workspace will be used.
@@ -499,7 +470,7 @@ verta_create_registered_model <- function(name = NULL, desc = NULL, labels = NUL
 # Absolute path where deployment YAML was downloaded to. Matches download_to_path.
 #'
 #' @export
-verta_download_endpoint_manifest <- function(download_to_path, path, name, strategy = NULL, resources = NULL, autoscaling = NULL, env_vars = NULL, workspace = NULL) {
+download_endpoint_manifest <- function(download_to_path, path, name, strategy = NULL, resources = NULL, autoscaling = NULL, env_vars = NULL, workspace = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$download_endpoint_manifest(
@@ -529,7 +500,7 @@ verta_download_endpoint_manifest <- function(download_to_path, path, name, strat
 #' @param workspace workspace
 #'
 #' @export
-verta_find_datasets <- function(dataset_ids = NULL, name = NULL, tags = NULL, sort_key = NULL, ascending = FALSE, workspace = NULL) {
+find_datasets <- function(dataset_ids = NULL, name = NULL, tags = NULL, sort_key = NULL, ascending = FALSE, workspace = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$find_datasets(
@@ -555,13 +526,9 @@ verta_find_datasets <- function(dataset_ids = NULL, name = NULL, tags = NULL, so
 #' @param id ID of the dataset. This parameter cannot be provided alongside name.
 #'
 #' @return :class:`~verta._dataset_versioning.dataset.Dataset`
-# <string>:18: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-#
-# <string>:18: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_dataset <- function(name = NULL, workspace = NULL, id = NULL) {
+get_dataset <- function(name = NULL, workspace = NULL, id = NULL) {
 
   cl <- get_verta_client()
   python_function_result <- cl$get_dataset(
@@ -581,12 +548,9 @@ verta_get_dataset <- function(name = NULL, workspace = NULL, id = NULL) {
 #' @param id ID of the dataset version.
 #'
 #' @return :class:`~verta._dataset_versioning.dataset_version.DatasetVersion`
-# <string>:13: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:13: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_dataset_version <- function(id) {
+get_dataset_version <- function(id) {
 
   cl <- get_verta_client()
   python_function_result <- cl$get_dataset_version(
@@ -606,12 +570,9 @@ verta_get_dataset_version <- function(id) {
 #' @param id ID of the Endpoint. This parameter cannot be provided alongside path.
 #'
 #' @return :class:`~verta.endpoint._endpoint.Endpoint`
-# <string>:14: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:14: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_endpoint <- function(path = NULL, workspace = NULL, id = NULL) {
+get_endpoint <- function(path = NULL, workspace = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_endpoint(
@@ -632,12 +593,9 @@ verta_get_endpoint <- function(path = NULL, workspace = NULL, id = NULL) {
 #' @param id ID of the Experiment. This parameter cannot be provided alongside name.
 #'
 #' @return :class:`~verta._tracking.experiment.Experiment`
-# <string>:12: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:12: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_experiment <- function(name = NULL, id = NULL) {
+get_experiment <- function(name = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_experiment(
@@ -657,12 +615,9 @@ verta_get_experiment <- function(name = NULL, id = NULL) {
 #' @param id ID of the Experiment Run. This parameter cannot be provided alongside name.
 #'
 #' @return :class:`~verta._tracking.experimentrun.ExperimentRun`
-# <string>:12: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:12: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_experiment_run <- function(name = NULL, id = NULL) {
+get_experiment_run <- function(name = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_experiment_run(
@@ -687,22 +642,16 @@ verta_get_experiment_run <- function(name = NULL, id = NULL) {
 #' @param public_within_org If creating an endpoint in an organization's workspace: True
 # for public, False for private. In older backends, default is
 # private; in newer backends, uses the org's settings by default.
-#' @param visibility <string>:22: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-# <string>:22: (ERROR/3) Unknown interpreted text role "ref".
-# Visibility to set when creating this endpoint. If not provided, an
+#' @param visibility Visibility to set when creating this endpoint. If not provided, an
 # appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #' @param id ID of the endpoint. This parameter cannot be provided alongside name, and other
 # parameters will be ignored.
 #'
 #' @return :class:`~verta.endpoint._endpoint.Endpoint`
-# <string>:30: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:30: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_or_create_endpoint <- function(path = NULL, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
+get_or_create_endpoint <- function(path = NULL, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_or_create_endpoint(
@@ -733,12 +682,9 @@ verta_get_or_create_endpoint <- function(path = NULL, description = NULL, worksp
 #' @param id id
 #'
 #' @return :class:`~verta.registry._entities.model.RegisteredModel`
-# <string>:33: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:33: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_or_create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
+get_or_create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_or_create_registered_model(
@@ -766,25 +712,14 @@ verta_get_or_create_registered_model <- function(name = NULL, desc = NULL, label
 #' @param public_within_org If creating a Repository in an organization's workspace: True
 # for public, False for private. In older backends, default is
 # private; in newer backends, uses the org's settings by default.
-# #' @param visibility <string>:19: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-#
-# <string>:19: (ERROR/3) Unknown interpreted text role "ref".
-#
-# Visibility to set when creating this repository. If not provided,
+#' @param visibility Visibility to set when creating this repository. If not provided,
 # an appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #'
-#' @return :class:`~verta._repository.Repository`
-# <string>:23: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-#
-# <string>:23: (ERROR/3) Unknown interpreted text role "class".
-#
-# Specified Repository.
+#' @return :class:`~verta._repository.Repository` Specified Repository.
 #'
 #' @export
-verta_get_or_create_repository <- function(name = NULL, workspace = NULL, id = NULL, public_within_org = NULL, visibility = NULL) {
+get_or_create_repository <- function(name = NULL, workspace = NULL, id = NULL, public_within_org = NULL, visibility = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_or_create_repository(
@@ -809,14 +744,9 @@ verta_get_or_create_repository <- function(name = NULL, workspace = NULL, id = N
 #' @param id ID of the Project. This parameter cannot be provided alongside name.
 #'
 #' @return :class:`~verta._tracking.project.Project`
-
-# <string>:15: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-#
-# <string>:15: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_project <- function(name = NULL, workspace = NULL, id = NULL) {
+get_project <- function(name = NULL, workspace = NULL, id = NULL) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_project(
@@ -836,12 +766,9 @@ verta_get_project <- function(name = NULL, workspace = NULL, id = NULL) {
 #' @param id ID of the Model Version.
 #'
 #' @return :class:`~verta.registry._entities.modelversion.RegisteredModelVersion`
-# <string>:10: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-# <string>:10: (ERROR/3) Unknown interpreted text role "class".
 #'
 #' @export
-verta_get_registered_model_version <- function(id) {
+get_registered_model_version <- function(id) {
   cl <- get_verta_client()
 
   python_function_result <- cl$get_registered_model_version(
@@ -850,92 +777,6 @@ verta_get_registered_model_version <- function(id) {
   return(python_function_result)
 }
 
-#' @title set_experiment
-#'
-#' @description Attaches an Experiment under the currently active Project to this Client.
-#'
-#' @details If an accessible Experiment with name `name` does not already exist under the currently
-#' active Project, it will be created and initialized with specified metadata parameters. If
-#' such an Experiment does already exist, it will be retrieved; specifying metadata parameters
-#' in this case will raise a warning.
-#'
-#' @param name Name of the Experiment. If no name is provided, one will be generated.
-#' @param desc Description of the Experiment.
-#' @param tags Tags of the Experiment.
-#' @param attrs Attributes of the Experiment.
-#' @param id ID of the Experiment. This parameter cannot be provided alongside name, and other
-# parameters will be ignored.
-#'
-#' @return :class:`~verta._tracking.experiment.Experiment`
-
-# <string>:24: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-#
-# <string>:24: (ERROR/3) Unknown interpreted text role "class".
-#'
-#' @export
-verta_set_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL) {
-  cl <- get_verta_client()
-  python_function_result <- cl$set_experiment(
-    name = name,
-    desc = desc,
-    tags = tags,
-    attrs = attrs,
-    id = id
-  )
-  return(python_function_result)
-}
-
-#' @title set_project
-#'
-#' @description Attaches a Project to this Client.
-#'
-#' @details If an accessible Project with name `name` does not already exist, it will be created
-#' and initialized with specified metadata parameters. If such a Project does already exist,
-#' it will be retrieved; specifying metadata parameters in this case will raise a warning. If an Experiment is already attached to this Client, it will be detached.
-#'
-#' @param name Name of the Project. If no name is provided, one will be generated.
-#' @param desc Description of the Project.
-#' @param tags Tags of the Project.
-#' @param attrs Attributes of the Project.
-#' @param workspace Workspace under which the Project with name name exists. If not provided, the current
-# user's personal workspace will be used.
-#' @param public_within_org If creating a Project in an organization's workspace: True for
-# public, False for private. In older backends, default is
-# private; in newer backends, uses the org's settings by default.
-#' @param visibility <string>:28: (INFO/1) No role entry for "ref" in module "docutils.parsers.rst.languages.en".
-# Trying "ref" as canonical role name.
-#
-# <string>:28: (ERROR/3) Unknown interpreted text role "ref".
-#
-# Visibility to set when creating this project. If not provided, an
-# appropriate default will be used. This parameter should be
-# preferred over public_within_org.
-#' @param id ID of the Project. This parameter cannot be provided alongside name, and other
-# parameters will be ignored.
-#'
-#' @return :class:`~verta._tracking.project.Project`
-# <string>:36: (INFO/1) No role entry for "class" in module "docutils.parsers.rst.languages.en".
-# Trying "class" as canonical role name.
-#
-# <string>:36: (ERROR/3) Unknown interpreted text role "class".
-#'
-#' @export
-verta_set_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
-  cl <- get_verta_client()
-
-  python_function_result <- cl$set_project(
-    name = name,
-    desc = desc,
-    tags = tags,
-    attrs = attrs,
-    workspace = workspace,
-    public_within_org = public_within_org,
-    visibility = visibility,
-    id = id
-  )
-  return(python_function_result)
-}
 
 #' @title set_workspace
 #'
@@ -951,7 +792,7 @@ verta_set_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NUL
 #' Verta workspace.
 #'
 #' @export
-verta_set_workspace <- function(workspace) {
+set_workspace <- function(workspace) {
   cl <- get_verta_client()
 
   python_function_result <- cl$set_workspace(
@@ -974,7 +815,7 @@ verta_set_workspace <- function(workspace) {
 #' Verta workspace.
 #'
 #' @export
-verta_log_model <- function(run,model,overwrite = FALSE) {
+log_model <- function(run, model, overwrite = FALSE) {
   stopifnot(is(run,"verta.tracking.entities.ExperimentRun"))
   # cl <- get_verta_client()
 

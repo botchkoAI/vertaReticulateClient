@@ -22,7 +22,6 @@ library(stringr)
 
 ```
 
-
 # Setup
 
 ```{r}
@@ -42,29 +41,6 @@ Sys.setenv(VERTA_EMAIL= "...",
           VERTA_DEV_KEY = "...")
 
 library(vertaReticulateClient)
-```
-```{r}
-# install_verta(method="system")
-```
-
-## Python verstions
-
- ### System python coase
- 
-```{r}
-
-# library(reticulate)
-# reticulate::use_python("/usr/bin/python3",required=T)# install verta from python console by
-# using pip install verta
-```
- 
-
-
-```{r}
-## then if using system python, pass the path as well.
-# point to the python path one can use
-# init_verta(HOST,method = "auto",python_path = "/usr/bin/python3")
-
 init_verta(HOST)
 ```
 
@@ -72,7 +48,7 @@ init_verta(HOST)
 
 ```{r}
 proj <- set_verta_project(name=PROJECT_NAME)
-experiment <- set_verta_experiment(name=EXPERIMENT_NAME)
+experiment <- set_experiment(name=EXPERIMENT_NAME)
 ```
 
 ## Auto Arima Example
@@ -166,33 +142,36 @@ save(list=c("predict.newForecaster"),file = "additional_objects.RData")
 ```
 
 ```{r}
-save_model_data(file_to_save_at = "fctArtifact.RData",
+save_model_data_2(file_to_save_at = "fctArtifact.RData",
                   modFile = WWWusageFit,
-                  # formula_obj = "mpg~.",
-                  # original_df = WWWusageTrain,
-                  required_packages = c("forecast"),
-                  additional_objects = list("predict.newForecaster"=predict.newForecaster)
+                  formula_obj = 
                   )
 ```
 
 ```{r}
-# fct
+
+first_model_object <- list(
+  model_file = WWWusageFit,
+  formula_obj = "mpg~.",
+  original_df = WWWusageTrain,
+  required_packages=c("forecast"),
+  additional_objects=list(
+    "predict.newForecaster"=predict.newForecaster
+  ),
+  
+  
+)
+
+saveRDS(first_model_object,"WWWUsage_object.RData")
+
 ```
-
-
-
 
 ### Log the model for future usage
 
 ```{r}
-log_model_data(run=run,
-                  modFile = WWWusageFit,
-                  # formula_obj = "mpg~.",
-                  # original_df = WWWusageTrain,
-                  required_packages = c("forecast"),
-                  additional_objects = list("predict.newForecaster"=predict.newForecaster)
-  
-)
+run$log_model(model = "WWWUsage_object.RData",overwrite = T)# # TODO- add# run_log
+
+
 ```
 
 ```{r}
@@ -208,8 +187,8 @@ downloaded_model # this is what it should be
 
 ```{r}
 createDockerContextZip(
-  "usage_object.RData"
-  # required_packages = "forecast"
+  "usage_object.RData",
+  required_packages = "forecast"
   #,
   #additional_objects_file_location="additional_objects.RData"
 )
@@ -218,7 +197,7 @@ createDockerContextZip(
 ### The above docker context could be build
 
 ```{r}
-buildDocker(location = "docker_folder_FCWAG0602T/",tag = "verta-forecast:latest")
+buildDocker(location = "docker_folder_GAOEI2889F/",tag = "verta-forecast:latest")
 ```
 
 Test with

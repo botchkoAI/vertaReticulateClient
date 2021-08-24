@@ -4,7 +4,6 @@
 # Created on: 23.06.21
 library(stringr)
 
-
 #' Title
 #'
 #' @param file
@@ -12,65 +11,53 @@ library(stringr)
 #' @return
 #' @export
 #'
-#' @examples
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
 #   print(names(dat))
   for (nm in c("model_file","required_packages","required_packages")) {
     assertthat::assert_that(nm%in% names(dat))
   }
-
   return(dat)
 }
 
 #' Predict Data From Saved Model
 #'
-#' @param file_to_save_at
-#' @param modFile
-#' @param formula_obj
-#' @param original_df
-#' @param required_packages
+#' @param file path to the file, holding the data
+#' @param data newdata to predict on
 #'
 #' @return
 #' @export
 #'
-#' @examples
 predict_new_model <- function(file,data){
   modeldat <- load_model_from_metadata(file)
   modelObj <- modeldat[["model_fit"]]
   formula_obj <- modeldat[["formula_obj"]]
   original_df <- modeldat[["original_df"]]
   required_packages <- modeldat[['required_packages']]
-
   #region install packages
   lib <- .libPaths()[1]
-
   i1 <- !(required_packages %in% row.names(installed.packages()))
   if(any(i1)) {
     install.packages(required_packages[i1], dependencies = TRUE, lib = lib)
   }
-
   #endregion install packages
-
   predicted_values <- predict(modelObj,newdata = data)
-
   predicted_values
-
 }
 
 
 #' Create Dockerfile From Saved Model Object
 #'
-#' @param file_to_save_at
-#' @param modFile
-#' @param formula_obj
-#' @param original_df
-#' @param required_packages
+#' @param required_packages required packages to hold
+#' @param model_file_location location of the model file
+#' @param plumber_template_location location to the plumber api script, by default the
+#' one from the package is used. Leave it as-is.
+#' @param runner_template_location  location of the runner template script, by default
+#' the one from the package distribution is used. Leave as is, normally.
 #'
 #' @return
 #' @export
 #'
-#' @examples
 createDockerfile <- function(
     model_file_location,
     required_packages=c("forecast"),
@@ -78,7 +65,8 @@ createDockerfile <- function(
                                           "plumber_sample.R",
     additional_objects_file_location = "additional_objects.RData"
     ),
-  runner_template_location = file.path(path.package("vertaReticulateClient"), "to_run.R" )
+  runner_template_location = file.path(path.package("vertaReticulateClient"),
+                                       "to_run.R" )
 ){
 
   MAGIC_FILE_NAME <- str_glue("./tmp_model_file_{rpois(1,10000)}.RData")
@@ -155,7 +143,6 @@ runDocker <- function(location=".",tag = "verta-plumber"){
 #'
 #' @return
 #'
-#' @examples
 createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1,add_docker_substring=T,add_rdata=F) {
   digits = 0:9 %>% as.character()
   v = c(sample(LETTERS, letter_len1, replace = TRUE),
@@ -193,7 +180,6 @@ createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1,add_docker_s
 #' @return
 #' @export
 #'
-#' @examples
 createDockerContextZip <- function(
     model_file_location
 ){
@@ -326,9 +312,8 @@ createDockerContextZip <- function(
 #' @return nothing
 #' @export
 #'
-#' @examples
 save_model_data <- function(file_to_save_at,
-                            modFile,
+                            modelObject,
                             required_packages=NULL,
                             additional_objects=list(),
                             plumber_template_location = file.path(path.package("vertaReticulateClient"),
@@ -347,7 +332,7 @@ save_model_data <- function(file_to_save_at,
 
 
   dat <- list(
-    model_fit = modFile,
+    model_fit = modelObject,
     required_packages = required_packages,
     additional_objects = additional_objects,
     plumberTemplateFileLines = plumberTemplateFileLines,
@@ -373,9 +358,8 @@ save_model_data <- function(file_to_save_at,
 #' @return nothing
 #' @export
 #'
-#' @examples
 log_model_data <- function(run,
-                            modFile,
+                            modelObject,
                             required_packages=NULL,
                             additional_objects=list(),
                             plumber_template_location = file.path(path.package("vertaReticulateClient"),
@@ -389,7 +373,7 @@ log_model_data <- function(run,
    tmp_file <- createRandString(add_docker_substring=F,add_rdata=T) # create temporary file name
 
    save_model_data(
-     tmp_file,modFile = modFile,
+     tmp_file,modelObject = modelObject,
      required_packages = required_packages,
      additional_objects = additional_objects,
      plumber_template_location = plumber_template_location,
@@ -397,7 +381,8 @@ log_model_data <- function(run,
    )
 
    # log the model to verta
-   verta_log_model(run,tmp_file,overwrite = T)
+   log_model(run, tmp_file, overwrite = T)
+
    # clean up by deleting the temp file
    if (file.exists(tmp_file)) {
       file.remove(tmp_file)

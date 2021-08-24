@@ -24,8 +24,7 @@ library(vertaReticulateClient)
 
 titles <- c(
   "The War of the Worlds",
-  "Pride and Prejudice",
-  ""
+  "Pride and Prejudice"
 )
 books <- gutenberg_works(title %in% titles) %>%
   gutenberg_download(meta_fields = "title") %>%
@@ -155,7 +154,7 @@ classifications <- tidy_books %>%
 classifications
 
 ```
-
+## Create a custom Predict Function
 ```{r}
 txtClassifier <- list(coefs=coefs,intercept= intercept)
 class(txtClassifier) <- "TextClassifier"
@@ -195,7 +194,7 @@ predict.TextClassifier <- function(model,newdata,colname="value"){
 }
 ```
 
-### Build Custom Prediction Class and OB
+### Create  
 
 ```{r}
 text_classification_deployment_object <- list(
@@ -261,12 +260,15 @@ experiment_random_string <- rpois(1,1000)
 
 PROJECT_NAME <-  str_glue("Text Authorship Examples {reg_random_string}")
 EXPERIMENT_NAME <-  str_glue("Text Authorship {experiment_random_string}")
-WORKSPACE <-  "..."
+WORKSPACE <-  "Stefan Petrov"
 
 # library(vertaReticulateClient)
 HOST = "dev.verta.ai"
 Sys.setenv(VERTA_EMAIL= "...",
           VERTA_DEV_KEY = "...")
+Sys.setenv(VERTA_EMAIL= "stefan.petrov@toptal.com",
+          VERTA_DEV_KEY = "53869492-9d26-4671-88c9-13160889291c")
+
 
 init_verta(HOST)
 
@@ -274,7 +276,7 @@ init_verta(HOST)
 
 ```{r}
 proj <- set_verta_project(name=PROJECT_NAME)
-experiment <- set_verta_experiment(name=EXPERIMENT_NAME)
+experiment <- set_experiment(name=EXPERIMENT_NAME)
 ```
 ```{r}
 run <- set_experiment_run(name=EXPERIMENT_NAME,desc = "Authorship Attribution")
@@ -286,18 +288,30 @@ run$log_model(model = "textClassificationDeploymentObject.RData")# # TODO- add# 
 
 
 
+## Download Model
+```{r}
+run$download_model("./text_classification_deployment_object.RData")
+```
+
 
 ```{r}
 createDockerContextZip(
-  "textClassificationDeploymentObject.RData.RData",
+  "text_classification_deployment_object.RData",
   required_packages = text_classification_deployment_object$required_packages
-  
 )
 ```
 
+
 ```{r}
-buildDocker(location = "docker_folder_RXFRD9058O/",tag="verta-text:latest")
+buildDocker(location = "docker_folder_LGMDM5254D/",tag="verta-text:latest")
 ```
+
+```{bash}
+docker kill $(docker container ls -q)
+docker run -t 8000:8000 verta-text:latest
+
+```
+
 
 Test with for example 
 
@@ -307,4 +321,11 @@ Test with for example
 
     [{"text":"This was not written by Jane Austin."}]
 
+[
+  {
+    "document": 1,
+    "score": 4.0377,
+    "probability": 0.9914
+  }
+]
 
