@@ -144,8 +144,8 @@ buildDocker <- function(location = ".",tag="verta-plumber"){
 
 #' Title
 #'
-#' @param location
-#' @param tag
+#' @param location location of docker context
+#' @param tag tag of the model
 #'
 #' @return
 #' @export
@@ -157,11 +157,11 @@ runDocker <- function(location=".",tag = "verta-plumber"){
 #' Utility function to create a random string of a specific format
 #' the format is
 #' (if add_docker_substring then "docker_folder_" else "")[:alpha:]{letter_len1}[:digit:]{digit_len}_[:alpha:]{letter_len2}.(if add_rdata then .RData else "")
-#' @param letter_len1 How many
-#' @param digit_len
-#' @param letter_len2
-#' @param add_docker_substring
-#' @param add_rdata
+#' @param letter_len1 length first set of letters
+#' @param digit_len length of first set of digits
+#' @param letter_len2 length of second set of letters
+#' @param add_docker_substring weather to add 'docker_folcer_' in the beginning
+#' @param add_rdata weather to add ".RData" in the end
 #'
 #' @return
 #'
@@ -225,8 +225,7 @@ createDockerContextZip <- function(
             saveRDS(modelData,file=file.path(MAGIC_FOLDER_NAME,MAGIC_FILE_NAME))
           }
         }
-	}
-  else{
+	}else{
      # if the model is already in memory, write it to a temporary folder
       MAGIC_FILE_NAME <- "tmp_model_file.RData"
       while(dir.exists(MAGIC_FOLDER_NAME)){
@@ -339,6 +338,7 @@ save_model_data <- function(file_to_save_at,
                             required_packages=NULL,
                             additional_objects=list(),
                             plumber_template_location = file.path(path.package("vertaReticulateClient"),
+                                                                 # "inst",
                                                                   "plumber_sample.R"
                             ),
                           runner_template_location = file.path(
@@ -385,10 +385,13 @@ log_model_data <- function(run,
                             required_packages=NULL,
                             additional_objects=list(),
                             plumber_template_location = file.path(path.package("vertaReticulateClient"),
+                                                                  # "inst",
                                                                   "plumber_sample.R"
                             ),
                           runner_template_location = file.path(
-                            path.package("vertaReticulateClient"), "to_run.R" )
+                            path.package("vertaReticulateClient"),
+                            # "inst" ,
+                            "to_run.R" )
 ) {
 
    # save everything needed to a temp file
