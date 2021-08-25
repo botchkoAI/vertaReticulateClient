@@ -4,17 +4,17 @@
 # Created on: 23.06.21
 library(stringr)
 
-#' Title
+#' @title Read model from RDS file
+#' This is a simple wrapper around readRDS, checking if some of the list names exist.
+#' @param file - the file name of an RDS. The object inside should be a list, containing 'model_file' and 'required_packages'
 #'
-#' @param file
-#'
-#' @return
+#' @return the list in the file if all needed attributes are inside
 #' @export
 #'
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
 #   print(names(dat))
-  for (nm in c("model_file","required_packages","required_packages")) {
+  for (nm in c("model_file","required_packages")) {
     assertthat::assert_that(nm%in% names(dat))
   }
   return(dat)
@@ -178,6 +178,7 @@ createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1,add_docker_s
         if(add_rdata){
             res <- paste0(res,".Rdata",collapse = "")
         }
+#   paste0("docker_folder_",paste0(v,collapse = ""),collapse = "")
   res
 
 }
