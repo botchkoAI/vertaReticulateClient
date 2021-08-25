@@ -12,7 +12,7 @@ get_experiment(name = NULL, id = NULL)
 \item{id}{ID of the Experiment. This parameter cannot be provided alongside name.}
 }
 \value{
-:class:`~verta._tracking.experiment.Experiment`
+:class:`verta._tracking.experiment.Experiment`
 }
 \description{
 Retrieves an already created Experiment. Only one of `name` or `id` can be provided.

@@ -27,7 +27,7 @@ get_or_create_endpoint(
 \item{id}{ID of the endpoint. This parameter cannot be provided alongside name, and other}
 }
 \value{
-:class:`~verta.endpoint._endpoint.Endpoint`
+:class:`verta.endpoint._endpoint.Endpoint`
 }
 \description{
 Attaches an endpoint to this Client.

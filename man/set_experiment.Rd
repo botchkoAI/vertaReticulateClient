@@ -19,7 +19,7 @@ set_experiment(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL)
 parameters will be ignored.}
 }
 \value{
-:class:`~verta._tracking.experiment.Experiment`
+:class:`verta._tracking.experiment.Experiment`
 }
 \description{
 Attaches an Experiment under the currently active Project to this Client.

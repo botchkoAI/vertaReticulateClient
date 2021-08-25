@@ -12,7 +12,7 @@ get_experiment_run(name = NULL, id = NULL)
 \item{id}{ID of the Experiment Run. This parameter cannot be provided alongside name.}
 }
 \value{
-:class:`~verta._tracking.experimentrun.ExperimentRun`
+:class:`verta._tracking.experimentrun.ExperimentRun`
 }
 \description{
 Retrieves an already created Experiment Run. Only one of `name` or `id` can be provided.

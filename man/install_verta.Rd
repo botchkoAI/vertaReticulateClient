@@ -22,8 +22,8 @@ Finding Conda in reticulate  for more details.}
 
 \item{envname}{The name, or full path, of the environment in which Python
 packages are to be installed. When NULL (the default), the active environment
- as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
-  then the r-reticulate environment will be used.}
+as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
+then the r-reticulate environment will be used.}
 
 \item{extra_packages}{Extra packages to install.}
 

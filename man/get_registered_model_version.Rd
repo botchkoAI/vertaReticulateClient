@@ -10,7 +10,7 @@ get_registered_model_version(id)
 \item{id}{ID of the Model Version.}
 }
 \value{
-:class:`~verta.registry._entities.modelversion.RegisteredModelVersion`
+:class:`verta.registry._entities.modelversion.RegisteredModelVersion`
 }
 \description{
 Retrieve an already created Model Version.

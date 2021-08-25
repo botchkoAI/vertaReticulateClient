@@ -24,7 +24,7 @@ get_or_create_repository(
 \item{visibility}{Visibility to set when creating this repository. If not provided,}
 }
 \value{
-:class:`~verta._repository.Repository` Specified Repository.
+:class:`verta._repository.Repository` Specified Repository.
 }
 \description{
 Gets or creates a Repository by `name` and `workspace`, or gets a Repository by `id`.

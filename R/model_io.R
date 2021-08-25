@@ -1,5 +1,5 @@
-# Title     : TODO
-# Objective : TODO
+# Title     :
+# Objective : Utilities for bundling of models in a way, suitable for model
 # Created by: sidi
 # Created on: 23.06.21
 library(stringr)
@@ -126,6 +126,14 @@ createDockerfile <- function(
 
 
 
+#' Title
+#'
+#' @param location path to the Docker context folder - normally that's the
+#' current working directory
+#' @param tag The tag, with which
+#'
+#' @return
+#' @export
 buildDocker <- function(location = ".",tag="verta-plumber"){
   system(str_glue("docker build -t {tag} {location}"))
 }
@@ -134,12 +142,26 @@ buildDocker <- function(location = ".",tag="verta-plumber"){
 
 
 
+#' Title
+#'
+#' @param location
+#' @param tag
+#'
+#' @return
+#' @export
 runDocker <- function(location=".",tag = "verta-plumber"){
   buildDocker(location,tag)
   system(str_glue("docker run -p 8000:8000 {tag}"))
 }
 
-#' generate random string
+#' Utility function to create a random string of a specific format
+#' the format is
+#' (if add_docker_substring then "docker_folder_" else "")[:alpha:]{letter_len1}[:digit:]{digit_len}_[:alpha:]{letter_len2}.(if add_rdata then .RData else "")
+#' @param letter_len1 How many
+#' @param digit_len
+#' @param letter_len2
+#' @param add_docker_substring
+#' @param add_rdata
 #'
 #' @return
 #'
@@ -156,7 +178,6 @@ createRandString<- function(letter_len1=5,digit_len=4,letter_len2=1,add_docker_s
         if(add_rdata){
             res <- paste0(res,".Rdata",collapse = "")
         }
-#   paste0("docker_folder_",paste0(v,collapse = ""),collapse = "")
   res
 
 }

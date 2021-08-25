@@ -17,14 +17,19 @@ create_endpoint(
 
 \item{description}{Description of the endpoint.}
 
-\item{workspace}{Workspace under which the endpoint with name name exists. If not provided, the current}
+\item{workspace}{Workspace under which the endpoint with name name exists. If not provided, the current
+user's personal workspace will be used.}
 
-\item{public_within_org}{If creating an endpoint in an organization's workspace: True}
+\item{public_within_org}{If creating an endpoint in an organization's workspace: True
+for public, False for private. In older backends, default is
+private; in newer backends, uses the org's settings by default.}
 
-\item{visibility}{Visibility to set when creating this endpoint. If not provided, an}
+\item{visibility}{Visibility to set when creating this endpoint. If not provided, an
+appropriate default will be used. This parameter should be
+preferred over public_within_org.}
 }
 \value{
-:class:`~verta.registry._entities.model.RegisteredModel`
+:class:`verta.registry._entities.model.RegisteredModel`
 }
 \description{
 Attaches an endpoint to this Client.

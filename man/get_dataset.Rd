@@ -14,7 +14,7 @@ get_dataset(name = NULL, workspace = NULL, id = NULL)
 \item{id}{ID of the dataset. This parameter cannot be provided alongside name.}
 }
 \value{
-:class:`~verta._dataset_versioning.dataset.Dataset`
+:class:`verta._dataset_versioning.dataset.Dataset`
 }
 \description{
 Gets a dataset.

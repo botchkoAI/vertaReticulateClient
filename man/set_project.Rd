@@ -27,14 +27,19 @@ set_project(
 \item{workspace}{Workspace under which the Project with name name exists. If not provided, the current
 user's personal workspace will be used.}
 
-\item{public_within_org}{If creating a Project in an organization's workspace: True for}
+\item{public_within_org}{If creating a Project in an organization's workspace: True for
+public, False for private. In older backends, default is
+private; in newer backends, uses the org's settings by default.}
 
-\item{visibility}{Visibility to set when creating this project. If not provided, an}
+\item{visibility}{Visibility to set when creating this project. If not provided, an
+appropriate default will be used. This parameter should be
+preferred over public_within_org.}
 
-\item{id}{ID of the Project. This parameter cannot be provided alongside name, and other}
+\item{id}{ID of the Project. This parameter cannot be provided alongside name, and other
+parameters will be ignored.}
 }
 \value{
-:class:`~verta._tracking.project.Project`
+:class:`verta._tracking.project.Project`
 }
 \description{
 Attaches a Project to this Client.

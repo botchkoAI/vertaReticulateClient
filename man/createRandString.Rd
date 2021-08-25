@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_io.R
 \name{createRandString}
 \alias{createRandString}
-\title{generate random string}
+\title{Title}
 \usage{
 createRandString(
   letter_len1 = 5,
@@ -12,9 +12,12 @@ createRandString(
   add_rdata = F
 )
 }
+\arguments{
+\item{add_rdata}{}
+}
 \value{
 
 }
 \description{
-generate random string
+Title
 }

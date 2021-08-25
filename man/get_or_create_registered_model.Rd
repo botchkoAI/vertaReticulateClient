@@ -30,7 +30,7 @@ get_or_create_registered_model(
 \item{id}{id}
 }
 \value{
-:class:`~verta.registry._entities.model.RegisteredModel`
+:class:`verta.registry._entities.model.RegisteredModel`
 }
 \description{
 Attaches a registered_model to this Client.

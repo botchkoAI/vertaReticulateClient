@@ -41,7 +41,7 @@ tags : list of str, optional Tags of the Experiment Run.
 attrs : dict of str to {NULL, bool, float, int, str}, optional Attributes of the Experiment Run.
 id : str, optional ID of the Experiment Run. This parameter cannot be provided alongside `name`, and other parameters will be ignored. Returns
 -------
-:class:`~verta.tracking.entities.ExperimentRun` Raises
+:class:`verta.tracking.entities.ExperimentRun` Raises
 ------
 ValueError If an Experiment Run with `name` already exists, but metadata parameters are passed in.
 AttributeError If an Experiment is not yet in progress.

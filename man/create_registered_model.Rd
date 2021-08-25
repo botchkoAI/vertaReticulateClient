@@ -27,7 +27,7 @@ create_registered_model(
 \item{visibility}{visibility}
 }
 \value{
-:class:`~verta.registry._entities.model.RegisteredModel`
+:class:`verta.registry._entities.model.RegisteredModel`
 }
 \description{
 Creates a new Registered Model.

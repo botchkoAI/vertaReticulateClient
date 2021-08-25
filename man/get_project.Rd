@@ -14,7 +14,7 @@ get_project(name = NULL, workspace = NULL, id = NULL)
 \item{id}{ID of the Project. This parameter cannot be provided alongside name.}
 }
 \value{
-:class:`~verta._tracking.project.Project`
+:class:`verta._tracking.project.Project`
 }
 \description{
 Retrieves an already created Project. Only one of `name` or `id` can be provided.

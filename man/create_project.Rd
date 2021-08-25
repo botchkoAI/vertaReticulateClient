@@ -30,7 +30,7 @@ create_project(
 \item{visibility}{Visibility to set when creating this project. If not provided, an}
 }
 \value{
-:class:`~verta._tracking.project.Project`
+:class:`verta._tracking.project.Project`
 }
 \description{
 Creates a new Project.

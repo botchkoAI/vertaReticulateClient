@@ -10,7 +10,7 @@ get_dataset_version(id)
 \item{id}{ID of the dataset version.}
 }
 \value{
-:class:`~verta._dataset_versioning.dataset_version.DatasetVersion`
+:class:`verta._dataset_versioning.dataset_version.DatasetVersion`
 }
 \description{
 Gets a dataset version.

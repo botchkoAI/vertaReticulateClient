@@ -14,7 +14,7 @@ get_endpoint(path = NULL, workspace = NULL, id = NULL)
 \item{id}{ID of the Endpoint. This parameter cannot be provided alongside path.}
 }
 \value{
-:class:`~verta.endpoint._endpoint.Endpoint`
+:class:`verta.endpoint._endpoint.Endpoint`
 }
 \description{
 Retrieves an already created Endpoint. Only one of `path` or `id` can be provided.

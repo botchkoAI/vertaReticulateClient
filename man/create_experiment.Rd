@@ -16,7 +16,7 @@ create_experiment(name = NULL, desc = NULL, tags = NULL, attrs = NULL)
 \item{attrs}{Attributes of the Experiment.}
 }
 \value{
-:class:`~verta._tracking.experiment.Experiment`
+:class:`verta._tracking.experiment.Experiment`
 }
 \description{
 Creates a new Experiment under the currently active Project.

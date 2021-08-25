@@ -5,8 +5,8 @@
 #' Finding Conda in reticulate  for more details.
 #' @param envname  The name, or full path, of the environment in which Python
 #' packages are to be installed. When NULL (the default), the active environment
-#'  as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
-#'   then the r-reticulate environment will be used.
+#' as set by the RETICULATE_PYTHON_ENV variable will be used; if that is unset,
+#' then the r-reticulate environment will be used.
 #' @param extra_packages Extra packages to install.
 #' @param conda_python_version passed to reticulate::py_install
 #' @param ... passed down to reticulate::py_install
@@ -234,11 +234,14 @@ if(F){
 }
 
 
-#---------------------
 
+#' Title
+#'
+#' @return
+#'
 get_verta_client <- function() {
   ret <- getOption('verta_client')
-  if (is.null('neptune'))
+  if (is.null('verta'))
     stop('Please call init_verta first')
   return(ret)
 }
@@ -260,15 +263,15 @@ get_verta_client <- function() {
 #' @param workspace Workspace under which the Project with name name exists. If not provided, the current
 #' user's personal workspace will be used.
 #' @param public_within_org If creating a Project in an organization's workspace: True for
-# public, False for private. In older backends, default is
-# private; in newer backends, uses the org's settings by default.
+#' public, False for private. In older backends, default is
+#' private; in newer backends, uses the org's settings by default.
 #' @param visibility  Visibility to set when creating this project. If not provided, an
-# appropriate default will be used. This parameter should be
-# preferred over public_within_org.
+#' appropriate default will be used. This parameter should be
+#' preferred over public_within_org.
 #' @param id ID of the Project. This parameter cannot be provided alongside name, and other
-# parameters will be ignored.
+#' parameters will be ignored.
 #'
-#' @return :class:`~verta._tracking.project.Project`
+#' @return :class:`verta._tracking.project.Project`
 #'
 #' @export
 set_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
@@ -304,7 +307,7 @@ set_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, wor
 #' @param id ID of the Experiment. This parameter cannot be provided alongside name, and other
 #' parameters will be ignored.
 #'
-#' @return :class:`~verta._tracking.experiment.Experiment`
+#' @return :class:`verta._tracking.experiment.Experiment`
 #'
 #' @export
 set_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, id = NULL) {
@@ -329,17 +332,15 @@ set_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, 
 #' @param path Path for the endpoint.
 #' @param description Description of the endpoint.
 #' @param workspace Workspace under which the endpoint with name name exists. If not provided, the current
-# user's personal workspace will be used.
+#' user's personal workspace will be used.
 #' @param public_within_org If creating an endpoint in an organization's workspace: True
-# for public, False for private. In older backends, default is
-# private; in newer backends, uses the org's settings by default.
+#' for public, False for private. In older backends, default is
+#' private; in newer backends, uses the org's settings by default.
 #' @param visibility Visibility to set when creating this endpoint. If not provided, an
-# appropriate default will be used. This parameter should be
-# preferred over public_within_org.
+#' appropriate default will be used. This parameter should be
+#' preferred over public_within_org.
 #'
-#' @return :class:`~verta.registry._entities.model.RegisteredModel`
-#
-#
+#' @return :class:`verta.registry._entities.model.RegisteredModel`
 #'
 #' @export
 create_endpoint <- function(path, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
@@ -366,7 +367,7 @@ create_endpoint <- function(path, description = NULL, workspace = NULL, public_w
 #' @param tags Tags of the Experiment.
 #' @param attrs Attributes of the Experiment.
 #'
-#' @return :class:`~verta._tracking.experiment.Experiment`
+#' @return :class:`verta._tracking.experiment.Experiment`
 #'
 #' @export
 create_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL) {
@@ -401,7 +402,7 @@ create_experiment <- function(name = NULL, desc = NULL, tags = NULL, attrs = NUL
 # appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #'
-#' @return :class:`~verta._tracking.project.Project`
+#' @return :class:`verta._tracking.project.Project`
 #'
 #' @export
 create_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
@@ -432,7 +433,7 @@ create_project <- function(name = NULL, desc = NULL, tags = NULL, attrs = NULL, 
 #' @param public_within_org public_within_org
 #' @param visibility visibility
 #'
-#' @return :class:`~verta.registry._entities.model.RegisteredModel`
+#' @return :class:`verta.registry._entities.model.RegisteredModel`
 #'
 #' @export
 create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL) {
@@ -525,7 +526,7 @@ find_datasets <- function(dataset_ids = NULL, name = NULL, tags = NULL, sort_key
 # user's personal workspace will be used.
 #' @param id ID of the dataset. This parameter cannot be provided alongside name.
 #'
-#' @return :class:`~verta._dataset_versioning.dataset.Dataset`
+#' @return :class:`verta._dataset_versioning.dataset.Dataset`
 #'
 #' @export
 get_dataset <- function(name = NULL, workspace = NULL, id = NULL) {
@@ -547,7 +548,7 @@ get_dataset <- function(name = NULL, workspace = NULL, id = NULL) {
 #'
 #' @param id ID of the dataset version.
 #'
-#' @return :class:`~verta._dataset_versioning.dataset_version.DatasetVersion`
+#' @return :class:`verta._dataset_versioning.dataset_version.DatasetVersion`
 #'
 #' @export
 get_dataset_version <- function(id) {
@@ -569,7 +570,7 @@ get_dataset_version <- function(id) {
 #' @param workspace Name of the workspace of the Endpoint.
 #' @param id ID of the Endpoint. This parameter cannot be provided alongside path.
 #'
-#' @return :class:`~verta.endpoint._endpoint.Endpoint`
+#' @return :class:`verta.endpoint._endpoint.Endpoint`
 #'
 #' @export
 get_endpoint <- function(path = NULL, workspace = NULL, id = NULL) {
@@ -592,7 +593,7 @@ get_endpoint <- function(path = NULL, workspace = NULL, id = NULL) {
 #' @param name Name of the Experiment.
 #' @param id ID of the Experiment. This parameter cannot be provided alongside name.
 #'
-#' @return :class:`~verta._tracking.experiment.Experiment`
+#' @return :class:`verta._tracking.experiment.Experiment`
 #'
 #' @export
 get_experiment <- function(name = NULL, id = NULL) {
@@ -614,7 +615,7 @@ get_experiment <- function(name = NULL, id = NULL) {
 #' @param name Name of the Experiment Run.
 #' @param id ID of the Experiment Run. This parameter cannot be provided alongside name.
 #'
-#' @return :class:`~verta._tracking.experimentrun.ExperimentRun`
+#' @return :class:`verta._tracking.experimentrun.ExperimentRun`
 #'
 #' @export
 get_experiment_run <- function(name = NULL, id = NULL) {
@@ -648,7 +649,7 @@ get_experiment_run <- function(name = NULL, id = NULL) {
 #' @param id ID of the endpoint. This parameter cannot be provided alongside name, and other
 # parameters will be ignored.
 #'
-#' @return :class:`~verta.endpoint._endpoint.Endpoint`
+#' @return :class:`verta.endpoint._endpoint.Endpoint`
 #'
 #' @export
 get_or_create_endpoint <- function(path = NULL, description = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
@@ -681,7 +682,7 @@ get_or_create_endpoint <- function(path = NULL, description = NULL, workspace = 
 #' @param visibility visibility
 #' @param id id
 #'
-#' @return :class:`~verta.registry._entities.model.RegisteredModel`
+#' @return :class:`verta.registry._entities.model.RegisteredModel`
 #'
 #' @export
 get_or_create_registered_model <- function(name = NULL, desc = NULL, labels = NULL, workspace = NULL, public_within_org = NULL, visibility = NULL, id = NULL) {
@@ -716,7 +717,7 @@ get_or_create_registered_model <- function(name = NULL, desc = NULL, labels = NU
 # an appropriate default will be used. This parameter should be
 # preferred over public_within_org.
 #'
-#' @return :class:`~verta._repository.Repository` Specified Repository.
+#' @return :class:`verta._repository.Repository` Specified Repository.
 #'
 #' @export
 get_or_create_repository <- function(name = NULL, workspace = NULL, id = NULL, public_within_org = NULL, visibility = NULL) {
@@ -743,7 +744,7 @@ get_or_create_repository <- function(name = NULL, workspace = NULL, id = NULL, p
 # user's personal workspace will be used.
 #' @param id ID of the Project. This parameter cannot be provided alongside name.
 #'
-#' @return :class:`~verta._tracking.project.Project`
+#' @return :class:`verta._tracking.project.Project`
 #'
 #' @export
 get_project <- function(name = NULL, workspace = NULL, id = NULL) {
@@ -765,7 +766,7 @@ get_project <- function(name = NULL, workspace = NULL, id = NULL) {
 #'
 #' @param id ID of the Model Version.
 #'
-#' @return :class:`~verta.registry._entities.modelversion.RegisteredModelVersion`
+#' @return :class:`verta.registry._entities.modelversion.RegisteredModelVersion`
 #'
 #' @export
 get_registered_model_version <- function(id) {
@@ -842,7 +843,7 @@ log_model <- function(run, model, overwrite = FALSE) {
 #' attrs : dict of str to {NULL, bool, float, int, str}, optional Attributes of the Experiment Run.
 #' id : str, optional ID of the Experiment Run. This parameter cannot be provided alongside `name`, and other parameters will be ignored. Returns
 #' -------
-#' :class:`~verta.tracking.entities.ExperimentRun` Raises
+#' :class:`verta.tracking.entities.ExperimentRun` Raises
 #' ------
 #' ValueError If an Experiment Run with `name` already exists, but metadata parameters are passed in.
 #' AttributeError If an Experiment is not yet in progress.
