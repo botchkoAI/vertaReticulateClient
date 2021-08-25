@@ -1,20 +1,20 @@
-# Title     : TODO
-# Objective : TODO
+# Title     : Model-related Processing 
+# Objective : R-specific, related to model deployment, bundling objects for it and so on, go here.
 # Created by: sidi
 # Created on: 23.06.21
 library(stringr)
 
-#' Title
+#' @title Read model from RDS file 
+#' This is a simple wrapper around readRDS, checking if some of the list names exist.
+#' @param file - the file name of an RDS. The object inside should be a list, containing 'model_file' and 'required_packages'
 #'
-#' @param file
-#'
-#' @return
+#' @return the list in the file if all needed attributes are inside
 #' @export
 #'
 load_model_from_metadata <- function(file){
   dat  <- readRDS(file = file)
 #   print(names(dat))
-  for (nm in c("model_file","required_packages","required_packages")) {
+  for (nm in c("model_file","required_packages")) {
     assertthat::assert_that(nm%in% names(dat))
   }
   return(dat)
