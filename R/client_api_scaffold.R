@@ -1003,5 +1003,26 @@ get_best_run_by_metric <- function(experiment,metric, descending = TRUE) {
 
 }
 
+
+#' Download a model object from ExperimentRun
+#'
+#' @param run
+#' @param download_to_path
+#'
+#' @return
+#' @export
+#'
+#' @examples
+download_model <- function(run,download_to_path){
+  stopifnot(is(run,"verta.tracking.entities.ExperimentRun"))
+
+  python_function_result <- run$download_model(download_to_path = download_to_path)
+  if(length(python_function_result)>0){
+    python_function_result[1]
+  }else{
+    python_function_result
+  }
+}
+
 #TODO add download model
 

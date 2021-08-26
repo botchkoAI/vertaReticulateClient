@@ -1,14 +1,16 @@
 ---
-title: "Verta Reticulate Workflow"
-output: html_notebook
+title: "Verta Workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Verta Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
-This is closely following this [jupyter notebook](https://github.com/VertaAI/modeldb/blob/master/client/workflows/demos/dataset-registry-endpoint.ipynb)
-
-It contains somewhat scattered usage examples
+This is closely following this [jupyter notebook](https://github.com/VertaAI/modeldb/blob/master/client/workflows/demos/dataset-registry-endpoint.ipynb).
+The point is to go trough several of the functionalities of __VERTA__ modeldb.
 
 # Setup
-
 ```{r}
 library(reticulate)
 library(data.table)
@@ -26,8 +28,11 @@ HOST = "dev.verta.ai"
 PROJECT_NAME <-  str_glue("MTCARS Regression{reg_random_string}")
 EXPERIMENT_NAME <-  "Linear Regressions"
 WORKSPACE <-  "Stefan_Petrov"
+# Sys.setenv(VERTA_EMAIL= "...",
+#            VERTA_DEV_KEY = "...")
+
 Sys.setenv(VERTA_EMAIL= "...",
-           VERTA_DEV_KEY = "...")
+          VERTA_DEV_KEY = "...")
 ```
 
 ## Initialize Client
@@ -35,10 +40,8 @@ Sys.setenv(VERTA_EMAIL= "...",
 ```{r}
 library(vertaReticulateClient)
 vertaReticulateClient::init_verta(HOST)
-# cl <- get_verta_client()
-# cl$create_dataset()
-proj <- vertaReticulateClient::set_verta_project(name="Reticulate MTCars")
-experiment <- vertaReticulateClient::set_verta_experiment(name="Verta R Experiment")
+proj <- vertaReticulateClient::set_project(name="Reticulate MTCars")
+experiment <- vertaReticulateClient::set_experiment(name="Verta R Experiment")
 ```
 
 ## Use mtcars for the experiment
@@ -52,7 +55,8 @@ testSet <- mtcars[(floor(N/2)+1):N,]
 ## Create 2 registered models to compate
 
 ```{r create_lm_model}
-run <- set_experiment_run(name="MTCars Experiment 4",desc = "MtCars Experiment 4")
+experiment_run_name <- str_glue("MTCars Run {rpois(1,1000)}")
+run <- set_experiment_run(name=experiment_run_name,desc = experiment_run_name)
 log_run_hyperparameters(run,hyperparams = list(hyperparam1=1,hyperparam2=2),overwrite = T)
 log_run_hyperparameters(run,hyperparams = list(formula="mpg~."),overwrite = T)
 
@@ -65,7 +69,7 @@ rsq <- summary_lm$adj.r.squared
 ```
 
 ```{r create_lm_model_2}
-run2 <- set_experiment_run(name="MTCars Experiment 3",
+run2 <- set_experiment_run(name=str_glue("MTCars Experiment 3 {rpois(1,10000)}"),
                            desc = "MTCars Experiment 3")
 log_run_hyperparameters(run2,hyperparams = list( formula=
                                                  "mpg~cyl+disp+hp+drat+wt+qsec+vs"
@@ -131,7 +135,7 @@ best_run_hyperparameters <- best_run$get_hyperparameters()
 
 registered_model_best_mtcars <- get_or_create_registered_model(name="mtcars_best",
                                                                workspace = WORKSPACE)
-registered_model_best_mtcars$create_version_from_run(best_run$id,name=str_glue("v_{rpois(1,10000)}"))
+registered_model_best_mtcars$create_version_from_run(best_run$id,name=str_glue("best_model_{rpois(1,10000)}"))
 ```
 
 ## Model Deployment
@@ -149,21 +153,44 @@ plumber_template_location <- file.path(path.package("vertaReticulateClient"),
 )
 
 
-createDockerfile(
-  model_file_location = "../mpg_model.RData",
-  # model_file_location = downloaded_model, 
-  runner_template_location = runner_template_location,
-  plumber_template_location = plumber_template_location,
-  required_packages = "forecast"
-  )
-
-# library(stringr)
-
-# runDocker(location =".",
-#           tag = "verta-plumber"
-# )
+# createDockerfile(
+#   model_file_location = "../mpg_model.RData",
+#   # model_file_location = downloaded_model, 
+#   runner_template_location = runner_template_location,
+#   plumber_template_location = plumber_template_location,
+#   required_packages = "forecast"
+#   )
 
 
+# log_model_data(best_run,file_to_save_at = "../mpg_model.RData",
+#                 downloaded_model,
+#                 required_packages = c()
+#                )
+
+log_model_data(best_run,modelObject = downloaded_model,required_packages = c())
+
+best_run$download_model("mpg_experiment_best_model.RData")
+
+
+```
+
+
+```{r}
+createDockerContextZip("mpg_experiment_best_model.RData")
+```
+
+
+
+### The above docker context could be build
+
+```{r,eval=FALSE}
+buildDocker(location = "docker_folder_YCEQR4149N/",tag = "verta-mtcars:latest")
+```
+
+Run the client with:
+```{bash,eval=FALSE}
+docker kill $(docker container ls -q)
+docker run -t 8000:8000 verta-mtcars:latest
 
 ```
 
@@ -180,15 +207,3 @@ Or
 POST <http://localhost:8000/score> Accept: application/json
 
 {"cyl":8,"disp":440,"hp":230,"drat":3.83,"wt":5.345,"qsec":17.42,"vs":0,"am":0,"gear":3,"carb":4,"\_row":"Chrysler Imperial"}
-```{r}
-createDockerfileWithFolder(
-  model_file_location = "../mpg_model.RData",
-  # model_file_location = downloaded_model, 
-  runner_template_location = runner_template_location,
-  plumber_template_location = plumber_template_location,
-  required_packages = "forecast"
-  )
-
-inst
-```
-

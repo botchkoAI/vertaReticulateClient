@@ -266,8 +266,6 @@ WORKSPACE <-  "Stefan Petrov"
 HOST = "dev.verta.ai"
 Sys.setenv(VERTA_EMAIL= "...",
           VERTA_DEV_KEY = "...")
-Sys.setenv(VERTA_EMAIL= "stefan.petrov@toptal.com",
-          VERTA_DEV_KEY = "53869492-9d26-4671-88c9-13160889291c")
 
 
 init_verta(HOST)

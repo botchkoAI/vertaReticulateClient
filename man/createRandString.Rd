@@ -2,7 +2,9 @@
 % Please edit documentation in R/model_io.R
 \name{createRandString}
 \alias{createRandString}
-\title{Title}
+\title{Utility function to create a random string of a specific format
+the format is
+(if add_docker_substring then "docker_folder_" else "")[:alpha:]{letter_len1}[:digit:]{digit_len}_[:alpha:]{letter_len2}.(if add_rdata then .RData else "")}
 \usage{
 createRandString(
   letter_len1 = 5,
@@ -13,11 +15,21 @@ createRandString(
 )
 }
 \arguments{
-\item{add_rdata}{}
+\item{letter_len1}{length first set of letters}
+
+\item{digit_len}{length of first set of digits}
+
+\item{letter_len2}{length of second set of letters}
+
+\item{add_docker_substring}{weather to add 'docker_folcer_' in the beginning}
+
+\item{add_rdata}{weather to add ".RData" in the end}
 }
 \value{
 
 }
 \description{
-Title
+Utility function to create a random string of a specific format
+the format is
+(if add_docker_substring then "docker_folder_" else "")[:alpha:]{letter_len1}[:digit:]{digit_len}_[:alpha:]{letter_len2}.(if add_rdata then .RData else "")
 }

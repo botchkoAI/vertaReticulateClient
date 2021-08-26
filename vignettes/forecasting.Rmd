@@ -1,6 +1,11 @@
 ---
 title: "Verta Forecasting and Custom Predict Functions"
-output: html_notebook
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Verta Forecasting and Custom Predict Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  
 editor_options: 
   markdown: 
     wrap: 72
@@ -37,8 +42,8 @@ WORKSPACE <-  "Stefan_Petrov"
 
 # library(vertaReticulateClient)
 HOST = "dev.verta.ai"
-Sys.setenv(VERTA_EMAIL= "...",
-          VERTA_DEV_KEY = "...")
+# Sys.setenv(VERTA_EMAIL= "...",
+#           VERTA_DEV_KEY = "...")
 
 library(vertaReticulateClient)
 init_verta(HOST)
@@ -47,8 +52,8 @@ init_verta(HOST)
 ## Initialize Client, experiments, etc
 
 ```{r}
-proj <- set_verta_project(name=PROJECT_NAME)
-experiment <- set_verta_experiment(name=EXPERIMENT_NAME)
+proj <- set_project(name=PROJECT_NAME)
+experiment <- set_experiment(name=EXPERIMENT_NAME)
 ```
 
 ## Auto Arima Example
@@ -142,40 +147,45 @@ save(list=c("predict.newForecaster"),file = "additional_objects.RData")
 ```
 
 ```{r}
-save_model_data_2(file_to_save_at = "fctArtifact.RData",
-                  modFile = WWWusageFit,
-                  formula_obj = "mpg~.",
-                  original_df = WWWusageTrain,
-                  required_packages = c("forecast"),
-                  additional_objects = list("predict.newForecaster"=predict.newForecaster)
+save_model_data(file_to_save_at = "fctArtifact.RData",
+                  modelObject =  WWWusageFit,
+                required_packages = c()
                   )
 ```
 
-
-
 ```{r}
 
-first_model_object <- list(
-  model_file = WWWusageFit,
-  formula_obj = "mpg~.",
-  original_df = WWWusageTrain,
-  required_packages=c("forecast"),
-  additional_objects=list(
-    "predict.newForecaster"=predict.newForecaster
-  )
-  
-  
-)
+# first_model_object <- list(
+#   model_file = WWWusageFit,
+#   formula_obj = "mpg~.",
+#   original_df = WWWusageTrain,
+#   required_packages=c("forecast"),
+#   additional_objects=list(
+#     "predict.newForecaster"=predict.newForecaster
+#   )
+# )
 
-saveRDS(first_model_object,"WWWUsage_object.RData")
+
+# save_model_data("WWWUsage_object.RData"
+#                 ,WWWusageFit
+#                 ,additional_objects=list(
+#     "predict.newForecaster"=predict.newForecaster
+#    )
+#   ,required_packages = c("forecast"))
+# saveRDS(first_model_object,"WWWUsage_object.RData")
 
 ```
 
 ### Log the model for future usage
 
 ```{r}
-# run$log_model(model = "WWWUsage_object.RData",overwrite = T)# # TODO- add# run_log
-run$log_model(model = "fctArtifact.RData",overwrite = T)# # TODO- add# run_log
+save_model_data("WWWUsage_object.RData"
+                ,WWWusageFit
+                ,additional_objects=list(
+    "predict.newForecaster"=predict.newForecaster
+   )
+  ,required_packages = c("forecast"))
+run$log_model(model = "WWWUsage_object.RData",overwrite = T)# # TODO- add# run_log
 
 
 ```
@@ -185,7 +195,7 @@ run$download_model("./usage_object.RData")
 # run$download_model("./dl_model/")
 
 downloaded_model <- readRDS("usage_object.RData")# this
-downloaded_model # this is what it should be
+# downloaded_model # this is what it should be
 
 ```
 
@@ -193,19 +203,22 @@ downloaded_model # this is what it should be
 
 ```{r}
 createDockerContextZip(
-  "usage_object.RData",
-  required_packages = "forecast"
-  #,
-  #additional_objects_file_location="additional_objects.RData"
+  "usage_object.RData"
 )
 ```
 
 ### The above docker context could be build
 
-```{r}
+```{r,eval=FALSE}
 buildDocker(location = "docker_folder_GAOEI2889F/",tag = "verta-forecast:latest")
 ```
 
+Run the client with:
+```{bash,eval=FALSE}
+docker kill $(docker container ls -q)
+docker run -t 8000:8000 verta-text:latest
+
+```
 Test with
 
     POST http://localhost:8000/score

@@ -2,16 +2,18 @@
 % Please edit documentation in R/model_io.R
 \name{load_model_from_metadata}
 \alias{load_model_from_metadata}
-\title{Title}
+\title{Read model from RDS file
+This is a simple wrapper around readRDS, checking if some of the list names exist.}
 \usage{
 load_model_from_metadata(file)
 }
 \arguments{
-\item{file}{}
+\item{file}{- the file name of an RDS. The object inside should be a list, containing 'model_file' and 'required_packages'}
 }
 \value{
-
+the list in the file if all needed attributes are inside
 }
 \description{
-Title
+Read model from RDS file
+This is a simple wrapper around readRDS, checking if some of the list names exist.
 }

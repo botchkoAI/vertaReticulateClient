@@ -1,10 +1,8 @@
 ---
-title: "Logistic Regression Example"
-author: "Vignette Author"
-date: "`r Sys.Date()`"
+title: "GLM Poisson Regression Example"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Logistic Regression Example}
+  %\VignetteIndexEntry{GLM Poisson Regression Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -75,6 +73,9 @@ WORKSPACE <-  "Stefan_Petrov"
 # library(vertaReticulateClient)
 HOST = "dev.verta.ai"
 
+
+Sys.setenv(VERTA_EMAIL= "...",
+          VERTA_DEV_KEY = "...")
 assertthat::see_if(
   (length(Sys.getenv("VERTA_EMAIL"))>1)&(
     length(Sys.getenv("VERTA_DEV_KEY"))>1
@@ -82,7 +83,7 @@ assertthat::see_if(
 )
 library(vertaReticulateClient)
 init_verta(HOST)
-proj <- set_verta_project(name=PROJECT_NAME)
+proj <- set_project(name=PROJECT_NAME)
 experiment <- set_experiment(name=EXPERIMENT_NAME)
 ```
 
@@ -109,8 +110,8 @@ downloaded_model
 #   )
 ```
 
-```{r}
-# buildDocker(location = "docker_folder_WZRUV5146S/",tag="verta-poisson:latest")
+```{r,eval=FALSE,echo=FALSE}
+buildDocker(location = "docker_folder_WZRUV5146S/",tag="verta-poisson:latest")
 ```
 
 
