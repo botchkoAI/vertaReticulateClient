@@ -33,11 +33,12 @@ WORKSPACE <-  "Stefan_Petrov"
 
 Sys.setenv(VERTA_EMAIL= "...",
           VERTA_DEV_KEY = "...")
+
 ```
 
 ## Initialize Client
 
-```{r}
+```{r }
 library(vertaReticulateClient)
 vertaReticulateClient::init_verta(HOST)
 proj <- vertaReticulateClient::set_project(name="Reticulate MTCars")

@@ -16,11 +16,12 @@
 #' @export
 #'
 install_verta <- function(
-  method = c("conda","auto","virtualenv"),
+  method = c("conda","auto","virtualenv","python"),
   conda = "auto",
   envname = "verta_reticulate",
   extra_packages = NULL,
   conda_python_version = "3.9.5",
+  python_path=NULL,
   ...
 
 
@@ -38,6 +39,7 @@ install_verta <- function(
 
   extra_packages <- unique(extra_packages)
 
+if(method != "python"){
   reticulate::py_install(
     packages       = c(package,"psutil", extra_packages),
     envname        = envname,
@@ -47,6 +49,20 @@ install_verta <- function(
     pip            = TRUE,
     ...
   )
+}else{
+   if(is.null(python_path)){
+     python_path <- try_find_python()
+   }
+  tryCatch(
+    system("pip3 install verta"),
+    error = function(e)tryCatch("pip install verta",
+                                error = function(e1)print(e1)
+    )
+
+  )
+
+
+}
 
 
   # reticulate::conda_create(envname = "verta_reticulate")
@@ -62,10 +78,25 @@ install_verta <- function(
 }
 
 
+try_find_python <- function(){
+  tryFindPython <- Sys.which("python3")[[1]]
+  if(str_length(tryFindPython)<1){
+    tryFindPython <- Sys.which("python")[[1]]
+    stopifnot(str_length(tryFindPython)>0)
+  }
+
+  tryFindPython
+}
+
 #' Initialize Verta Client object
 #'
+#' by default using conda with the default settings is recommended.
+#' This will create a verta_reticulate conda env, and the verta python client
+#' will be installed there.
+#' If the method is auto or python, we'll try to install verta using
+#' pip or pip3. If python_path is not provided, we'll try to find it.
 #' @param HOST The
-#' @param method - auto, virtualenv, or conda
+#' @param method - auto, virtualenv,conda or python -default conda
 #' @param conda - path to conda executable
 #' @param envname name of the conda environment
 #' @param python one of [python,conda, miniconda, venv]
@@ -111,9 +142,15 @@ if(F){
     switch(
       method,
       python= {
+        if(is.null(python_path)){
+          python_path <- try_find_python(python_path)
+        }
         use_python(python_path,required=T)
         },
        auto= {
+         if(is.null(python_path)){
+           python_path <- try_find_python(python_path)
+         }
         use_python(python_path,required=T)
         }
         ,
@@ -138,9 +175,15 @@ if(F){
     switch(
       method,
       python= {
+        if(is.null(python_path)){
+          python_path <- try_find_python()
+        }
         use_python(python_path,required=T)
         },
       auto= {
+        if(is.null(python_path)){
+          python_path <- try_find_python()
+        }
         use_python(python_path,required=T)
         },
       conda = {
@@ -164,9 +207,16 @@ if(F){
   switch(
       method,
       python= {
+
+        if(is.null(python_path)){
+          python_path <- try_find_python()
+        }
         use_python(python_path,required=T)
         },
       auto= {
+        if(is.null(python_path)){
+          python_path <- try_find_python()
+        }
         use_python(python_path,required=T)
         },
       conda = {
@@ -1006,13 +1056,12 @@ get_best_run_by_metric <- function(experiment,metric, descending = TRUE) {
 
 #' Download a model object from ExperimentRun
 #'
-#' @param run
-#' @param download_to_path
+#' @param run the experiment run object
+#' @param download_to_path download path
 #'
 #' @return
 #' @export
 #'
-#' @examples
 download_model <- function(run,download_to_path){
   stopifnot(is(run,"verta.tracking.entities.ExperimentRun"))
 

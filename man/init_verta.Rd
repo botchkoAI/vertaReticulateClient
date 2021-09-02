@@ -17,7 +17,7 @@ init_verta(
 \arguments{
 \item{HOST}{The}
 
-\item{method}{- auto, virtualenv, or conda}
+\item{method}{- auto, virtualenv,conda or python -default conda}
 
 \item{conda}{- path to conda executable}
 
@@ -31,5 +31,9 @@ init_verta(
 
 }
 \description{
-Initialize Verta Client object
+by default using conda with the default settings is recommended.
+This will create a verta_reticulate conda env, and the verta python client
+will be installed there.
+If the method is auto or python, we'll try to install verta using
+pip or pip3. If python_path is not provided, we'll try to find it.
 }

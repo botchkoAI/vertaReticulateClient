@@ -13,12 +13,11 @@ editor_options:
 
 # Setup and libraries to load
 
-```{r}
+```{r load libraries}
 library(data.table)
 library(magrittr)
 library(stringr)
 library(yardstick)
-# library(hts)
 library(ggplot2)
 library(forecast)
 library(ggplot2)
@@ -29,7 +28,7 @@ library(stringr)
 
 # Setup
 
-```{r}
+```{r setup verta library}
 reg_random_string <- rpois(1,1000)
 experiment_random_string <- rpois(1,1000)
 
@@ -42,8 +41,9 @@ WORKSPACE <-  "Stefan_Petrov"
 
 # library(vertaReticulateClient)
 HOST = "dev.verta.ai"
-# Sys.setenv(VERTA_EMAIL= "...",
-#           VERTA_DEV_KEY = "...")
+Sys.setenv(VERTA_EMAIL= "...",
+          VERTA_DEV_KEY = "...")
+
 
 library(vertaReticulateClient)
 init_verta(HOST)
@@ -188,6 +188,8 @@ save_model_data("WWWUsage_object.RData"
 run$log_model(model = "WWWUsage_object.RData",overwrite = T)# # TODO- add# run_log
 
 
+
+
 ```
 
 ```{r}
@@ -201,7 +203,7 @@ downloaded_model <- readRDS("usage_object.RData")# this
 
 ### Create Docker Context
 
-```{r}
+```{r,eval=F}
 createDockerContextZip(
   "usage_object.RData"
 )

@@ -5,11 +5,12 @@
 \title{Install Verta Library}
 \usage{
 install_verta(
-  method = c("conda", "auto", "virtualenv"),
+  method = c("conda", "auto", "virtualenv", "python"),
   conda = "auto",
   envname = "verta_reticulate",
   extra_packages = NULL,
   conda_python_version = "3.9.5",
+  python_path = NULL,
   ...
 )
 }
